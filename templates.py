@@ -10,7 +10,7 @@ DOC_TEMPLATE = (
     '.next {left: 50%; right: 0; text-align:right; align-items: flex-end}'
     'a {opacity: 0; color: #888888; transition: opacity 0.2s}'
     'a:hover {opacity: 1;}'
-    '.arrow {position: fixed; top: 50%; margin-top: 50px; z-index: -1}'
+    '.arrow {position: fixed; top: 50%; margin-top: -50px; z-index: -1}'
     '</style>'
     '</head>'
     '<body>'
