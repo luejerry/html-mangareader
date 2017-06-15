@@ -36,6 +36,15 @@ def extract_zip(path, img_types, outpath=os.path.join(tempfile.gettempdir(), 'ht
             return None
         return zip_file.extractall(outpath, imagefiles)
 
+def extract_render(path, doc_template, page_template, img_types, outpath):
+    try:
+        zipresult = extract_zip(path, img_types)
+        if zipresult:
+            render_from_template(path, doc_template, page_template, img_types)
+    except zipfile.BadZipFile:
+        print('{} does not appear to be a valid zip/cbz file.'.format(path))
+    return
+
 if __name__ == '__main__':
     path = '.' if len(sys.argv) <= 1 else sys.argv[1]
     # render_from_template(path, templates.DOC_TEMPLATE, templates.IMG_TEMPLATE, templates.DEFAULT_IMAGETYPES, os.path.join(path, 'render.html'))
