@@ -26,3 +26,11 @@ IMG_TEMPLATE = (
     '<span class="next">❯</span></a>\n'
     '<img src=$img /></div>\n'
 )
+
+DEFAULT_IMAGETYPES = {
+    'jpg',
+    'png',
+    'bmp',
+    'jpeg',
+    'gif'
+}

@@ -1,5 +1,6 @@
 import sys
 import os
+import tempfile
 
 # Recognized image file type extensions
 imagetypes = {'jpg', 'png', 'bmp', 'jpeg', 'gif'}
@@ -43,6 +44,19 @@ def render(path):
     renderfd.close()
 
 # arg in sys.argv
+
+def render_from_template(path, 
+                         doc_template, page_template, img_types,
+                         outfile=tempfile.gettempdir()):
+    files = filter(lambda e: os.path.isfile(os.path.join(path, e)),
+                   os.listdir(path))
+    imagefiles = list(filter(lambda f: f.split('.')[-1].lower() in imagetypes,
+                             files))
+    if not imagefiles:
+        print('No image files were found in path: {0}'.format(path))
+        return
+    
+    pass
 
 if __name__ == '__main__':
     path = '.' if len(sys.argv) <= 1 else sys.argv[1]
