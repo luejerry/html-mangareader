@@ -13,7 +13,7 @@ def render_from_template(paths,
                          doc_template, page_template, img_types,
                          outfile=os.path.join(tempfile.gettempdir(), 'html-mangareader', 'render.html')):
     if not paths:
-        raise ImagesNotFound
+        raise ImagesNotFound('No images were sent to the renderer.')
     imagepaths = [Path(p).as_uri() for p in paths]
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
@@ -23,7 +23,7 @@ def render_from_template(paths,
                     for i in range(0, len(imagepaths))]
         doc_string = html_template.substitute(body=''.join(img_list))
         renderfd.write(doc_string)
-    print("view saved to " + outfile)
+    # print("view saved to " + outfile)
     return outfile
 
 
@@ -37,9 +37,9 @@ def render_bootstrap(outfile, render, index, boot_template):
 def scan_directory(path, img_types):
     files = filter(lambda f: f.is_file(), Path(path).iterdir())
     # files = filter(lambda f: os.path.isfile(os.path.join(path, f)), os.listdir(path))
-    imagefiles = filter(lambda f: f.suffix.lower()[1:] in img_types, files)
+    imagefiles = list(filter(lambda f: f.suffix.lower()[1:] in img_types, files))
     if not imagefiles:
-        raise ImagesNotFound('No image files were found in directory: {}'.format(path))
+        raise ImagesNotFound('No image files were found in directory "{}"'.format(Path(path).resolve()))
     return [p if p.is_absolute() else p.resolve() for p in sorted(imagefiles, key=filename_comparator)]
 
 
@@ -64,17 +64,15 @@ def extract_render(path, doc_template, page_template, boot_template, img_types,
             else:
                 try:
                     imgpath = extract_zip(path, img_types, str(outpath))
-                except zipfile.BadZipFile:
-                    print('{} does not appear to be a valid zip/cbz file.'.format(path))
-                    return
+                except zipfile.BadZipFile as e:
+                    raise zipfile.BadZipfile('"{}" does not appear to be a valid zip/cbz file.'.format(path))
         else:
             imgpath = scan_directory(path, img_types)
         renderfile = render_from_template(imgpath, doc_template, page_template, img_types, str(outpath / 'render.html'))
         bootfile = render_bootstrap(str(outpath / 'boot.html'), Path(renderfile).as_uri(), start, boot_template)
         webbrowser.open(Path(bootfile).as_uri())
     except ImagesNotFound as e:
-        print(e)
-        return
+        raise e
     return
 
 

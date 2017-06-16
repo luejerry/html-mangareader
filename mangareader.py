@@ -12,4 +12,9 @@ if __name__ == '__main__':
                             '- Drag a ZIP or CBZ archive onto the MangaReader icon')
         exit(0)
     path = '.' if len(sys.argv) <= 1 else sys.argv[1]
-    extract_render(path, templates.DOC_TEMPLATE, templates.IMG_TEMPLATE, templates.BOOT_TEMPLATE, templates.DEFAULT_IMAGETYPES)
+    try:
+        extract_render(path, templates.DOC_TEMPLATE, templates.IMG_TEMPLATE, templates.BOOT_TEMPLATE, templates.DEFAULT_IMAGETYPES)
+    except Exception as e:
+        Tk().withdraw()
+        messagebox.showerror('MangaReader encountered an error: ' + type(e).__name__,
+                             str(e))
