@@ -1,10 +1,11 @@
 import os
-import tempfile
-from string import Template
-from pathlib import Path
-import zipfile
-import webbrowser
 import re
+import tempfile
+import webbrowser
+import zipfile
+from pathlib import Path
+from string import Template
+
 from excepts import ImagesNotFound
 
 
@@ -65,14 +66,15 @@ def extract_render(path, doc_template, page_template, boot_template, img_types,
                 try:
                     imgpath = extract_zip(path, img_types, str(outpath))
                 except zipfile.BadZipFile as e:
-                    raise zipfile.BadZipfile('"{}" does not appear to be a valid zip/cbz file.'.format(path))
+                    raise zipfile.BadZipfile('"{}" does not appear to be a valid zip/cbz file.'.format(path)) \
+                        .with_traceback(e.__traceback__)
         else:
             imgpath = scan_directory(path, img_types)
         renderfile = render_from_template(imgpath, doc_template, page_template, img_types, str(outpath / 'render.html'))
-        bootfile = render_bootstrap(str(outpath / 'boot.html'), Path(renderfile).as_uri(), start, boot_template)
+        bootfile = render_bootstrap(str(outpath/'boot.html'), Path(renderfile).as_uri(), start, boot_template)
         webbrowser.open(Path(bootfile).as_uri())
-    except ImagesNotFound as e:
-        raise e
+    except ImagesNotFound:
+        raise
     return
 
 
