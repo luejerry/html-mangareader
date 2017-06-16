@@ -2,7 +2,7 @@ import sys
 import os
 import tempfile
 from string import Template
-import pathlib
+from pathlib import Path
 import zipfile
 import webbrowser
 from tkinter import Tk
@@ -17,7 +17,9 @@ from excepts import ImagesNotFound
 def render_from_template(paths,
                          doc_template, page_template, img_types,
                          outfile=os.path.join(tempfile.gettempdir(), 'html-mangareader', 'render.html')):
-    imagepaths = [pathlib.Path(p).as_uri() for p in paths]
+    if not paths:
+        raise ImagesNotFound
+    imagepaths = [Path(p).as_uri() for p in paths]
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
         html_template = Template(doc_template)
@@ -30,8 +32,11 @@ def render_from_template(paths,
     return outfile
 
 def scan_directory(path, img_types):
+    files = filter(lambda f: f.is_file(), Path(path).iterdir())
     files = filter(lambda f: os.path.isfile(os.path.join(path, f)), os.listdir(path))
     imagefiles = filter(lambda f: f.split('.')[-1].lower() in img_types, files)
+    if not imagefiles:
+        raise ImagesNotFound('No image files were found in directory: {}'.format(path))
     return [os.path.join(path, p) for p in sorted(imagefiles, key=filename_comparator)]
 
 def extract_zip(path, img_types, outpath=os.path.join(tempfile.gettempdir(), 'html-mangareader')):
@@ -44,18 +49,20 @@ def extract_zip(path, img_types, outpath=os.path.join(tempfile.gettempdir(), 'ht
 
 
 def extract_render(path, doc_template, page_template, img_types, outpath):
-    if os.path.isfile(path):
-        try:
-            imgpath = extract_zip(path, img_types)
-        except zipfile.BadZipFile:
-            print('{} does not appear to be a valid zip/cbz file.'.format(path))
-            return
-    else:
-        imgpath = scan_directory(path, img_types)
-        if not imgpath:
-            print('No images were found in {}'.format(path))
-            return
+    start = 0
     try:
+        if os.path.isfile(path):
+            if path.split('.')[-1].lower() in img_types:
+                imgpath = scan_directory(os.path.dirname(path), img_types)
+                start = filter(lambda p: os.path.basename(path))
+            else:
+                try:
+                    imgpath = extract_zip(path, img_types)
+                except zipfile.BadZipFile:
+                    print('{} does not appear to be a valid zip/cbz file.'.format(path))
+                    return
+        else:
+            imgpath = scan_directory(path, img_types)
         renderfile = render_from_template(imgpath, doc_template, page_template, img_types)
         webbrowser.open(renderfile)
     except ImagesNotFound as e:
