@@ -9,6 +9,7 @@ import webbrowser
 import templates
 from excepts import ImagesNotFound
 
+# todo: take list of explicit image paths, which are passed in from listdir or the unzip
 def render_from_template(path,
                          doc_template, page_template, img_types,
                          outfile=os.path.join(tempfile.gettempdir(), 'html-mangareader', 'render.html')):
@@ -17,7 +18,7 @@ def render_from_template(path,
     imagefiles = filter(lambda f: f.split('.')[-1].lower() in img_types, files)
     if not imagefiles:
         raise ImagesNotFound('No image files were found in path: {0}'.format(path))
-    imagepaths = [pathlib.Path(os.path.join(path, p)).as_uri() for p in imagefiles]
+    imagepaths = [pathlib.Path(os.path.join(path, p)).as_uri() for p in sorted(imagefiles, key=str.lower)]
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
         html_template = Template(doc_template)
@@ -34,7 +35,8 @@ def extract_zip(path, img_types, outpath=os.path.join(tempfile.gettempdir(), 'ht
         imagefiles = filter(lambda f: f.split('.')[-1].lower() in img_types, zip_file.namelist())
         if not imagefiles:
             raise ImagesNotFound('No image files were found in archive: {}'.format(path))
-        return zip_file.extractall(outpath, imagefiles)
+        zip_file.extractall(outpath, imagefiles)
+        return outpath
 
 def extract_render(path, doc_template, page_template, img_types, outpath):
     imgpath = path
