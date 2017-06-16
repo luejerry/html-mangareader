@@ -1,15 +1,10 @@
-import sys
 import os
 import tempfile
 from string import Template
 from pathlib import Path
 import zipfile
 import webbrowser
-from tkinter import Tk
-from tkinter import messagebox
 import re
-
-import templates
 from excepts import ImagesNotFound
 
 
@@ -31,11 +26,13 @@ def render_from_template(paths,
     print("view saved to " + outfile)
     return outfile
 
+
 def render_bootstrap(outfile, render, index, boot_template):
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as bootfd:
         html_boot = Template(boot_template).substitute(document='{}#{}'.format(render, index))
         bootfd.write(html_boot)
     return outfile
+
 
 def scan_directory(path, img_types):
     files = filter(lambda f: f.is_file(), Path(path).iterdir())
@@ -45,16 +42,18 @@ def scan_directory(path, img_types):
         raise ImagesNotFound('No image files were found in directory: {}'.format(path))
     return [p if p.is_absolute() else p.resolve() for p in sorted(imagefiles, key=filename_comparator)]
 
+
 def extract_zip(path, img_types, outpath=os.path.join(tempfile.gettempdir(), 'html-mangareader')):
     with zipfile.ZipFile(path, mode='r') as zip_file:
         imagefiles = list(filter(lambda f: f.split('.')[-1].lower() in img_types, zip_file.namelist()))
         if not imagefiles:
             raise ImagesNotFound('No image files were found in archive: {}'.format(path))
         zip_file.extractall(outpath, imagefiles)
-        return [Path(outpath)/image for image in sorted(imagefiles, key=filename_comparator)]
+        return [Path(outpath) / image for image in sorted(imagefiles, key=filename_comparator)]
 
 
-def extract_render(path, doc_template, page_template, boot_template, img_types, outpath=Path(tempfile.gettempdir())/'html-mangareader'):
+def extract_render(path, doc_template, page_template, boot_template, img_types,
+                   outpath=Path(tempfile.gettempdir()) / 'html-mangareader'):
     start = 0
     pPath = Path(path).resolve()
     try:
@@ -70,8 +69,8 @@ def extract_render(path, doc_template, page_template, boot_template, img_types, 
                     return
         else:
             imgpath = scan_directory(path, img_types)
-        renderfile = render_from_template(imgpath, doc_template, page_template, img_types, str(outpath/'render.html'))
-        bootfile = render_bootstrap(str(outpath/'boot.html'), Path(renderfile).as_uri(), start, boot_template)
+        renderfile = render_from_template(imgpath, doc_template, page_template, img_types, str(outpath / 'render.html'))
+        bootfile = render_bootstrap(str(outpath / 'boot.html'), Path(renderfile).as_uri(), start, boot_template)
         webbrowser.open(Path(bootfile).as_uri())
     except ImagesNotFound as e:
         print(e)
@@ -83,19 +82,3 @@ def filename_comparator(filename):
     """Natural sort comparison key function. Thanks to <https://stackoverflow.com/a/16090640> for this bit of genius"""
     return [int(s) if s.isdigit() else s.lower()
             for s in re.split(r'(\d+)', str(filename))]
-
-
-if __name__ == '__main__':
-    if len(sys.argv) <= 1:
-        Tk().withdraw()
-        messagebox.showinfo('HTML MangaReader - simply the fastest comic book reader',
-                            'Start reading your favorite comics by doing one of the following:\n'
-                            '- Drag an image folder or file onto the MangaReader icon, or\n'
-                            '- Drag a ZIP or CBZ archive onto the MangaReader icon')
-        exit(0)
-    path = '.' if len(sys.argv) <= 1 else sys.argv[1]
-    # render_from_template(path, templates.DOC_TEMPLATE, templates.IMG_TEMPLATE, templates.DEFAULT_IMAGETYPES, os.path.join(path, 'render.html'))
-    # render_from_template(path, templates.DOC_TEMPLATE, templates.IMG_TEMPLATE, templates.DEFAULT_IMAGETYPES)
-    # outpath = extract_zip('testar.zip', templates.DEFAULT_IMAGETYPES)
-    # print(outpath)
-    extract_render(path, templates.DOC_TEMPLATE, templates.IMG_TEMPLATE, templates.BOOT_TEMPLATE, templates.DEFAULT_IMAGETYPES)
