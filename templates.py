@@ -33,6 +33,12 @@ IMG_TEMPLATE = (
     '<img src=$img /></div>\n'
 )
 
+BOOT_TEMPLATE = (
+    '<html><head>'
+    '<meta http-equiv="refresh" content="0; url=$document">'
+    '</head></html>'
+)
+
 DEFAULT_IMAGETYPES = {
     'jpg',
     'png',
