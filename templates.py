@@ -4,7 +4,7 @@ DOC_TEMPLATE = (
     '<head><meta charset="utf-8"><title>Images</title>'
     '<style>'
     'body {font-size: 80px; background-color: #F0F0F0}'
-    'img {box-shadow: 0px 0px 10px 0px #8A8A8A; border-radius: 3px}'
+    'img {box-shadow: 0px 2px 7px 0px rgba(0,0,0,0.1); border-radius: 5px; border-style: solid; border-width: 1px; border-color: #DDDDDD}'
     '.next, .prev {position: absolute; top: 0; bottom: 0; display: inline-flex; flex-direction: column; justify-content: center; z-index: 10; opacity: 0; transition: opacity 0.2s}'
     '.next:hover, .prev:hover {opacity: 1}'
     '.prev {left: 0; right: 50%; text-align:left; align-items: flex-start}'
