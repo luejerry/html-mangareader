@@ -44,7 +44,7 @@ IMG_TEMPLATE = (
 
 BOOT_TEMPLATE = (
     '<html><head>'
-    '<meta http-equiv="refresh" content="0; url=$document">'
+    '<meta http-equiv="refresh" content="0; url=$document#_$index">'
     '</head></html>'
 )
 
