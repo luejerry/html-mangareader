@@ -23,12 +23,12 @@ DOC_TEMPLATE = (
 )
 
 IMG_TEMPLATE = (
-    '<div id="$id" align="center" style="position:relative; margin: 50px 0">\n'
-    '<a href="#$previd">'
+    '<div id="_$id" align="center" style="position:relative; margin: 50px 0">\n'
+    '<a href="#_$previd">'
     '<span class="prev">'
     '<div class="arrow left">❮</div>'
     '</span></a>\n'
-    '<a href="#$nextid">'
+    '<a href="#_$nextid">'
     '<span class="next">'
     '<div class="arrow right">❯</div>'
     '</span></a>\n'
@@ -37,7 +37,7 @@ IMG_TEMPLATE = (
 
 BOOT_TEMPLATE = (
     '<html><head>'
-    '<meta http-equiv="refresh" content="0; url=$document">'
+    '<meta http-equiv="refresh" content="0; url=$document#_$index">'
     '</head></html>'
 )
 

@@ -30,7 +30,7 @@ def render_from_template(paths,
 
 def render_bootstrap(outfile, render, index, boot_template):
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as bootfd:
-        html_boot = Template(boot_template).substitute(document='{}#{}'.format(render, index))
+        html_boot = Template(boot_template).substitute(document=render, index=index)
         bootfd.write(html_boot)
     return outfile
 
