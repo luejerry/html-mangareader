@@ -1,14 +1,14 @@
 # [HTML] Mangareader
 
-Mangareader is an elegantly simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ archive as a single, continuously scrollable page in your default browser. No background server process. No scripts. No Chromium or other unnecessary bloat. No process stays running after the page is rendered. Just HTML and CSS in the browser you already have open.
+Mangareader is an elegantly simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ archive as a single, continuously scrollable page in your default browser. "Oh look, yet another bloated webapp for the desktop from the incontinent bowels of a lazy half-assed developer," I can already hear you think. Lazy the dev may be, but fear not. There is no background server process. No Javascript. No Chromium or other unnecessary bloat. No process stays running after the page is rendered. No internet connection. Just local organic HTML and CSS in the browser you already have open.
 
 I made this out of frustration with the bloat and clunkiness I experienced with other comic book readers I've tried for the Windows platform. If you need features like bookmarks, history, library management, cloud sync, and who knows what else, this is not the comic reader for you. This app does just one thing, which it does better than any other comic reader, and that is reading comics.
 
 ## Features
 
 * View your images in a continously scrollable page.
-* Unobtrusive and touch-friendly pagination controls also available for a more traditional viewing experience.
-* Zoom in and out as you would with your browser.
+* Use all the familiar navigation controls available on your browser/device setup. Smooth scroll, inertial scroll, horizontal scroll, pinch-zoom, 60fps hardware acceleration. Say goodbye to the awkward and jerky navigation of other comic readers.
+* Responsive and touch-friendly pagination controls also available for a more traditional viewing experience.
 * Open images in a folder or contained in a ZIP/CBZ file, of any format supported by the browser.
 
 ### Features intentionally omitted

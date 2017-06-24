@@ -1,1 +1,1 @@
-__all__ = ['htmlgenerator', 'templates', 'excepts']
+__all__ = ['mangarender', 'templates', 'excepts']
