@@ -4,7 +4,7 @@ from mangarender import extract_render
 import templates
 
 
-def main():
+def main() -> None:
     if len(sys.argv) <= 1:
         Tk().withdraw()
         messagebox.showinfo('HTML MangaReader - simply the fastest comic book reader',
