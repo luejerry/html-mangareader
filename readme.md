@@ -1,8 +1,8 @@
 # [HTML] Mangareader
 
-Mangareader is an elegantly simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ archive as a single, continuously scrollable page in your default browser. "Oh look, yet another bloated webapp for the desktop from the incontinent bowels of a lazy half-assed developer," I can already hear you think. Lazy the dev may be, but fear not. There is no background server process. No Javascript. No Chromium or other unnecessary bloat. No process stays running after the page is rendered. No internet connection. Just local organic HTML and CSS in the browser you already have open.
+Mangareader is an elegantly simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ archive as a single, continuously scrollable page in your default browser. "Oh look, yet another bloated Electron app that demands 500 megs of RAM to load a couple images," I can already hear you think. Fear not. There is no background server process. No Chromium or other unnecessary bloat. No process stays running after the page is rendered. No internet connection. No Javascript. Just local organic HTML and CSS in the browser you already have open.
 
-I made this out of frustration with the bloat and clunkiness I experienced with other comic book readers I've tried for the Windows platform. If you need features like bookmarks, history, library management, cloud sync, and who knows what else, this is not the comic reader for you. This app does just one thing, which it does better than any other comic reader, and that is reading comics.
+I made this out of frustration with the bloat and clunkiness I experienced with other comic book readers I've tried for the Windows platform. If you need features like bookmarks, history, library management, cloud sync, and who knows what else, this is not the comic reader for you. This app is focused only on simplicity and speed.
 
 ## Features
 
