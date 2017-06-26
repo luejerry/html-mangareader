@@ -6,19 +6,18 @@ import zipfile
 from pathlib import Path
 from string import Template
 from typing import List, Any
-
 from excepts import ImagesNotFound
 
 
-# todo: take list of explicit image paths, which are passed in from listdir or the unzip
 def render_from_template(
         paths: List[str],
         doc_template: str,
         page_template: str,
-        outfile: str = os.path.join(tempfile.gettempdir(), 'html-mangareader', 'render.html')
+        outfile: str = os.path.join(
+            tempfile.gettempdir(), 'html-mangareader', 'render.html')
 ) -> str:
     """Render a list of image paths to the finished HTML document.
-    
+
     Parameters:
     * `paths`: full file:// paths to images to render on the page.
     * `doc_template`: HTML template for the overall document.
@@ -57,7 +56,8 @@ def render_bootstrap(outfile: str, render: str, index: int, boot_template: str) 
     Returns: path to the rendered bootstrap document.
     """
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as bootfd:
-        html_boot = Template(boot_template).substitute(document=render, index=index)
+        html_boot = Template(boot_template).substitute(
+            document=render, index=index)
         bootfd.write(html_boot)
     return outfile
 
@@ -68,16 +68,18 @@ def scan_directory(path: str, img_types: List[str]) -> List[Path]:
     Parameters:
     * `path`: directory to scan for images.
     * `img_types`: list of recognized image file extensions.
-    
+
     Returns: list of absolute paths to image files.
 
     Throws: `ImagesNotFound` if no images were found in the directory.
     """
     files = filter(lambda f: f.is_file(), Path(path).iterdir())
     # files = filter(lambda f: os.path.isfile(os.path.join(path, f)), os.listdir(path))
-    imagefiles = list(filter(lambda f: f.suffix.lower()[1:] in img_types, files))
+    imagefiles = list(
+        filter(lambda f: f.suffix.lower()[1:] in img_types, files))
     if not imagefiles:
-        raise ImagesNotFound('No image files were found in directory "{}"'.format(Path(path).resolve()))
+        raise ImagesNotFound(
+            'No image files were found in directory "{}"'.format(Path(path).resolve()))
     return [p if p.is_absolute() else p.resolve() for p in sorted(imagefiles, key=filename_comparator)]
 
 
@@ -100,9 +102,11 @@ def extract_zip(
     * `BadZipFile` if archive could not be read.
     """
     with zipfile.ZipFile(path, mode='r') as zip_file:
-        imagefiles = list(filter(lambda f: f.split('.')[-1].lower() in img_types, zip_file.namelist()))
+        imagefiles = list(filter(lambda f: f.split(
+            '.')[-1].lower() in img_types, zip_file.namelist()))
         if not imagefiles:
-            raise ImagesNotFound('No image files were found in archive: {}'.format(path))
+            raise ImagesNotFound(
+                'No image files were found in archive: {}'.format(path))
         zip_file.extractall(outpath, imagefiles)
         return [Path(outpath) / image for image in sorted(imagefiles, key=filename_comparator)]
 
@@ -147,8 +151,10 @@ def extract_render(
                         .with_traceback(e.__traceback__)
         else:
             imgpath = scan_directory(path, img_types)
-        renderfile = render_from_template(imgpath, doc_template, page_template, str(outpath / 'render.html'))
-        bootfile = render_bootstrap(str(outpath / 'boot.html'), Path(renderfile).as_uri(), start, boot_template)
+        renderfile = render_from_template(
+            imgpath, doc_template, page_template, str(outpath / 'render.html'))
+        bootfile = render_bootstrap(
+            str(outpath / 'boot.html'), Path(renderfile).as_uri(), start, boot_template)
         webbrowser.open(Path(bootfile).as_uri())
     except ImagesNotFound:
         raise
