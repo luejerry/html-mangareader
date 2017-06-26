@@ -4,6 +4,8 @@ Mangareader is an elegantly simple image viewer designed for reading digital com
 
 I made this out of frustration with the bloat and clunkiness I experienced with other comic book readers I've tried for the Windows platform. If you need features like bookmarks, history, library management, cloud sync, and who knows what else, this is not the comic reader for you. This app is focused only on simplicity and speed.
 
+![Smooth scroll version on Windows 10](https://github.com/luejerry/html-mangareader/blob/master/doc/demo.gif)
+
 ## Features
 
 * View your images in a continously scrollable page.
