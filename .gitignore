@@ -1,0 +1,7 @@
+desktop.ini
+.idea/
+.vscode/
+build/
+dist/Mangareader/
+__pycache__/
+Thumbs.db
