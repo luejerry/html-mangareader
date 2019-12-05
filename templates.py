@@ -20,9 +20,7 @@ DOC_TEMPLATE = (
     '</head>'
     '<body>'
     '$body'
-    '<script>' +
-    SCROLL_TEMPLATE +
-    'zenscroll.setup(100)'
+    '<script>' + SCROLL_TEMPLATE + 'zenscroll.setup(100)'
     '</script>'
     '</body>'
     '</html>'
@@ -48,10 +46,5 @@ BOOT_TEMPLATE = (
     '</head></html>'
 )
 
-DEFAULT_IMAGETYPES = {
-    'jpg',
-    'png',
-    'bmp',
-    'jpeg',
-    'gif'
-}
+DEFAULT_IMAGETYPES = {'jpg', 'png', 'bmp', 'jpeg', 'gif'}
+
