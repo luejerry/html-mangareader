@@ -19,7 +19,7 @@ DOC_TEMPLATE = (
     '</style>'
     '</head>'
     '<body>'
-    '$body'
+    '${body}'
     '<script>' + SCROLL_TEMPLATE + 'zenscroll.setup(100)'
     '</script>'
     '</body>'
@@ -27,22 +27,22 @@ DOC_TEMPLATE = (
 )
 
 IMG_TEMPLATE = (
-    '<div id="_$id" align="center" style="position:relative; margin: 50px 0">\n'
-    '<a href="#_$previd">'
+    '<div id="_${id}" align="center" style="position:relative; margin: 50px 0">\n'
+    '<a href="#_${previd}">'
     '<span class="prev">'
     '<div class="arrow left">❮</div>'
     '</span></a>\n'
-    '<a href="#_$nextid">'
+    '<a href="#_${nextid}">'
     '<span class="next">'
     '<div class="arrow right">❯</div>'
     '</span></a>\n'
-    '<img src=$img /></div>\n'
+    '<img src="${img}" /></div>\n'
 )
 
 
 BOOT_TEMPLATE = (
     '<html><head>'
-    '<meta http-equiv="refresh" content="0; url=$document#_$index">'
+    '<meta http-equiv="refresh" content="0; url=${document}#_${index}">'
     '</head></html>'
 )
 
