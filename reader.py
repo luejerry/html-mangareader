@@ -1,6 +1,6 @@
 import sys
 from os import path
-from tkinter import Tk, messagebox
+from tkinter import Tk, messagebox, filedialog
 from mangareader.mangarender import extract_render
 from mangareader import templates
 from time import sleep
@@ -8,15 +8,21 @@ from time import sleep
 
 def main() -> None:
     if len(sys.argv) <= 1:
-        Tk().withdraw()
-        messagebox.showinfo(
-            'HTML MangaReader - simply the fastest comic book reader',
-            'Read your favorite comics by doing one of the following:',
-            detail='- Drag an image folder or file onto the MangaReader icon, or\n'
-            '- Drag a ZIP or CBZ archive onto the MangaReader icon',
+        imagetypes = ';'.join(f'*.{ext}' for ext in templates.DEFAULT_IMAGETYPES)
+        archivetypes = '*.cbz;*.zip'
+        filetypes = (
+            ('Supported files', ';'.join((imagetypes, archivetypes))),
+            ('Images', imagetypes),
+            ('Comic book archive', archivetypes),
+            ('All files', '*'),
         )
-        return
-    target_path = '.' if len(sys.argv) <= 1 else sys.argv[1]
+        target_path = filedialog.askopenfilename(
+            filetypes=filetypes, title='Open Image - Mangareader',
+        )
+        if not target_path:
+            return
+    else:
+        target_path = '.' if len(sys.argv) <= 1 else sys.argv[1]
     working_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
     lib_dir = f'{working_dir}/mangareader'
     try:

@@ -7,5 +7,5 @@ pyi-makespec --add-data="mangareader\styles.css;mangareader" ^
   --icon="symbols\air1.ico" ^
   --name="mangareader" ^
   --noconsole ^
-reader.py && \
+reader.py && ^
 pyinstaller --noconfirm mangareader.spec
