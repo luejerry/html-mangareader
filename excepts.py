@@ -1,2 +1,0 @@
-class ImagesNotFound(Exception):
-    pass

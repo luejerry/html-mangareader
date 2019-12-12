@@ -1,0 +1,2 @@
+class ImagesNotFound(Exception):
+    pass

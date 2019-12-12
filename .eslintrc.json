@@ -1,0 +1,44 @@
+{
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": false
+    },
+    "sourceType": "module",
+    "ecmaVersion": 8
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "no-const-assign": "warn",
+    "no-this-before-super": "warn",
+    "no-undef": "warn",
+    "no-unreachable": "warn",
+    "no-unused-vars": "warn",
+    "constructor-super": "warn",
+    "valid-typeof": "warn",
+    "indent": ["warn", 2, { "SwitchCase": 1 }],
+    "no-console": ["warn"],
+    "semi": "error",
+    "no-trailing-spaces": "warn",
+    "quotes": ["warn", "single"],
+    "eqeqeq": ["warn", "smart"],
+    "no-template-curly-in-string": ["warn"],
+    "curly": ["warn", "all"],
+    "no-alert": "warn",
+    "no-implicit-coercion": ["warn"],
+    "no-implicit-globals": "error",
+    "no-multi-spaces": "error",
+    "no-shadow": ["warn"],
+    "brace-style": "warn",
+    "comma-spacing": "warn",
+    "max-len": ["warn", { "code": 100 }],
+    "no-var": "error",
+    "prefer-const": "warn",
+    "comma-dangle": ["warn", "always-multiline"]
+  }
+}
