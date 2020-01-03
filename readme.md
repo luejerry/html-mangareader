@@ -35,12 +35,13 @@ The app can be started in several different ways:
 
 ## Build
 
-The application can be started directly by running `reader.py` (Python 3.5+); no external dependencies are required. Building the executable is done using [PyInstaller](https://www.pyinstaller.org/).
+Building the executable is done using [PyInstaller](https://www.pyinstaller.org/).
 
 ### Prerequisites
 
 - Python 3.5+
 - PyInstaller: `pip install pyinstaller`
+- Rarfile: `pip install rarfile` or `pip install -r requirements.txt`
 
 ### Building on Windows
 

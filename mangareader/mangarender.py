@@ -3,10 +3,12 @@ import re
 import tempfile
 import webbrowser
 import zipfile
+import rarfile
 from pathlib import Path
 from string import Template
 from typing import List, Any, Union, Iterable
 from mangareader.excepts import ImagesNotFound
+from mangareader.templates import RAR_TYPES, ZIP_TYPES
 from shutil import copy
 
 
@@ -92,12 +94,25 @@ def scan_directory(path: Union[str, Path], img_types: Iterable[str]) -> List[Pat
     ]
 
 
+def extract_archive(
+    img_types: Iterable[str],
+    archive: Union[zipfile.ZipFile, rarfile.RarFile],
+    outpath: str = os.path.join(tempfile.gettempdir(), 'html-mangareader'),
+) -> List[Path]:
+    """Extract image files in archive to the outpath."""
+    imagefiles = list(filter(lambda f: f.split('.')[-1].lower() in img_types, archive.namelist()))
+    if not imagefiles:
+        raise ImagesNotFound()
+    archive.extractall(outpath, imagefiles)
+    return [Path(outpath) / image for image in sorted(imagefiles, key=filename_comparator)]
+
+
 def extract_zip(
-    path: str,
+    path: Path,
     img_types: Iterable[str],
     outpath: str = os.path.join(tempfile.gettempdir(), 'html-mangareader'),
 ) -> List[Path]:
-    """Extract image files found in a zip/cbz file.
+    """Extract image files found in an archive file.
 
     Parameters:
     * `path`: path to archive.
@@ -108,16 +123,21 @@ def extract_zip(
 
     Throws:
     * `ImagesNotFound` if no images were found in the archive.
-    * `BadZipFile` if archive could not be read.
+    * `BadZipFile` if CBZ/ZIP archive could not be read.
+    * `BadRarFile` if CBR/RAR archive could not be read.
     """
-    with zipfile.ZipFile(path, mode='r') as zip_file:
-        imagefiles = list(
-            filter(lambda f: f.split('.')[-1].lower() in img_types, zip_file.namelist())
-        )
-        if not imagefiles:
-            raise ImagesNotFound(f'No image files were found in archive: {path}')
-        zip_file.extractall(outpath, imagefiles)
-        return [Path(outpath) / image for image in sorted(imagefiles, key=filename_comparator)]
+    file_ext = path.suffix.lower()[1:]
+    try:
+        if file_ext in ZIP_TYPES:
+            with zipfile.ZipFile(path, mode='r') as zip_file:
+                return extract_archive(img_types, zip_file)
+        elif file_ext in RAR_TYPES:
+            with rarfile.RarFile(path, mode='r') as rar_file:
+                return extract_archive(img_types, rar_file)
+        else:
+            raise ImagesNotFound(f'Unknown archive format: {path}')
+    except ImagesNotFound:
+        raise ImagesNotFound(f'No image files were found in archive: {path}')
 
 
 def resolve_template(path: Union[Path, str]) -> str:
@@ -171,10 +191,14 @@ def extract_render(
                 start = imgpath.index(pPath)
             else:
                 try:
-                    imgpath = extract_zip(path, img_types, str(outpath))
+                    imgpath = extract_zip(pPath, img_types, str(outpath))
                 except zipfile.BadZipFile as e:
                     raise zipfile.BadZipfile(
                         f'"{path}" does not appear to be a valid zip/cbz file.'
+                    ).with_traceback(e.__traceback__)
+                except rarfile.BadRarFile as e:
+                    raise rarfile.BadRarFile(
+                        f'"{path}" does not appear to be a valid rar/cbr file.'
                     ).with_traceback(e.__traceback__)
         else:
             imgpath = scan_directory(path, img_types)
