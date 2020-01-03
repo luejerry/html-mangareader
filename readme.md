@@ -29,16 +29,21 @@ Download and extract your desired version, and the application is ready to use. 
 
 The app can be started in several different ways:
 
+- Run `mangareader.exe` and open an image file or ZIP/CBZ.
 - Right click an image file or ZIP/CBZ, and "Open with..." the Mangareader executable.
 - Drag an image file, image folder, or ZIP/CBZ onto Mangareader executable or a shortcut.
-- Set Mangareader as the default application to open an image or ZIP/CBZ file.
 
-## Build (Windows) (WIP)
+## Build
 
-To build the executable file, install PyInstaller and run
+The application can be started directly by running `reader.py` (Python 3.5+); no external dependencies are required. Building the executable is done using [PyInstaller](https://www.pyinstaller.org/).
 
-```
-pyinstaller mangareader.spec
-```
+### Prerequisites
 
-Note: need to actually provide the command line instructions here since the spec file hardcodes an absolute path.
+- Python 3.5+
+- PyInstaller: `pip install pyinstaller`
+
+### Building on Windows
+
+Run `build-win.cmd`. The executable will be created in `dist\mangareader`.
+
+PyInstaller options can be configured in the script. See the [documentation](https://pyinstaller.readthedocs.io/en/stable/usage.html) for details.
