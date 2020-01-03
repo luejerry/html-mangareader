@@ -1,6 +1,6 @@
 # [HTML] Mangareader
 
-Mangareader is a simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ archive as a single, continuously scrollable page in your default browser.
+Mangareader is a simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ/RAR/CBR archive as a single, continuously scrollable page in your default browser.
 
 I made this out of frustration with the bloat and clunkiness I experienced with other comic book readers I've tried for the Windows platform. If you need features like bookmarks, history, library management, cloud sync, etc. this is not the comic reader for you. This app is focused only on simplicity and speed.
 
@@ -11,7 +11,7 @@ I made this out of frustration with the bloat and clunkiness I experienced with 
 - View your images in a continously scrollable page.
 - Use all the familiar navigation controls available on your browser/device setup.
 - Responsive and touch-friendly pagination controls also available for a more traditional viewing experience.
-- Open images in a folder or contained in a ZIP/CBZ file, of any format supported by the browser.
+- Open images in a folder or contained in a ZIP/CBZ/RAR/CBR file, of any format supported by the browser.
 
 ### Planned features
 
@@ -28,9 +28,9 @@ Download and extract your desired version, and the application is ready to use. 
 
 The app can be started in several different ways:
 
-- Run `mangareader.exe` and open an image file or ZIP/CBZ.
-- Right click an image file or ZIP/CBZ, and "Open with..." the Mangareader executable.
-- Drag an image file, image folder, or ZIP/CBZ onto Mangareader executable or a shortcut.
+- Run `mangareader.exe` and open an image file or ZIP/CBZ/RAR/CBR.
+- Right click an image file or archive, and "Open with..." the Mangareader executable.
+- Drag an image file, image folder, or archive onto Mangareader executable or a shortcut.
 
 ## Build
 
