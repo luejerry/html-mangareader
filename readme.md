@@ -15,13 +15,12 @@ I made this out of frustration with the bloat and clunkiness I experienced with 
 
 ### Planned features
 
-- RAR/CBR support.
 - 7z/CB7 support.
-- MacOS binary (for now, see Build section below to build your own).
+- MacOS binary.
 
 ## Install (Windows)
 
-Windows binaries are located in the `dist` directory.
+Windows binaries are located under [Releases](https://github.com/luejerry/html-mangareader/releases).
 
 Download and extract your desired version, and the application is ready to use. No installation is required.
 
