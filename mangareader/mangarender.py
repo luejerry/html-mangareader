@@ -66,6 +66,7 @@ def render_bootstrap(outfile: str, render: str, index: int, boot_template: str) 
 
 
 def render_copy(src_paths: Iterable[Union[Path, str]], dest_path: Path) -> None:
+    """Copy all files pointed by src_paths to destination."""
     for src in src_paths:
         copy(src, dest_path)
 
@@ -120,8 +121,16 @@ def extract_zip(
 
 
 def resolve_template(path: Union[Path, str]) -> str:
+    """Load the file at path a a UTF-8 string."""
     with open(path, encoding='utf-8') as template_file:
         return template_file.read()
+
+
+def create_out_path(outpath: Path) -> None:
+    """Create the output directory for the rendered page files. If outpath is a file, it is deleted."""
+    if outpath.exists() and outpath.is_file():
+        outpath.unlink()
+    outpath.mkdir(parents=True, exist_ok=True)
 
 
 def extract_render(
@@ -169,6 +178,7 @@ def extract_render(
                     ).with_traceback(e.__traceback__)
         else:
             imgpath = scan_directory(path, img_types)
+        create_out_path(outpath)
         render_copy(asset_paths, outpath)
         renderfile = render_from_template(
             imgpath, doc_template, page_template, str(outpath / 'render.html')
