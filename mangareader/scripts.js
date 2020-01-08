@@ -32,11 +32,30 @@
     },
   };
 
+  const pages = Array.from(document.getElementsByClassName('page'));
   const images = Array.from(document.getElementsByClassName('image'));
   const originalWidthBtn = document.getElementById('btn-original-width');
   const shrinkWidthBtn = document.getElementById('btn-shrink-width');
   const fitWidthBtn = document.getElementById('btn-fit-width');
   const smartFitBtns = Array.from(document.getElementsByClassName('btn-smart-fit'));
+
+  let visiblePage;
+
+  const intersectThreshold = 0.2;
+  const intersectObserver = new IntersectionObserver(
+    entries => {
+      entries
+        .filter(entry => entry.intersectionRatio > intersectThreshold)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        .map(entry => entry.target)
+        .forEach((target, index) => {
+          if (!index) {
+            visiblePage = target;
+          }
+        });
+    },
+    { threshold: [intersectThreshold] },
+  );
 
   const imagesMeta = images.map(image => {
     const ratio = image.naturalWidth / image.naturalHeight;
@@ -45,8 +64,6 @@
       orientation: ratio > 1 ? 'landscape' : 'portrait',
     };
   });
-
-  window.imagesMeta = imagesMeta;
 
   function getWidth() {
     return window.innerWidth - 16;
@@ -91,6 +108,7 @@
           });
       }
     }
+    visiblePage.scrollIntoView();
   }
 
   function smartFitImages(fitMode) {
@@ -109,6 +127,7 @@
           break;
       }
     }
+    visiblePage.scrollIntoView({ behavior: 'smooth' });
   }
 
   function setupListeners() {
@@ -120,8 +139,15 @@
     }
   }
 
+  function attachIntersectObservers() {
+    for (const page of pages) {
+      intersectObserver.observe(page);
+    }
+  }
+
   function main() {
     setupListeners();
+    attachIntersectObservers();
   }
 
   main();
