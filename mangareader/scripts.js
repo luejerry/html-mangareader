@@ -93,18 +93,21 @@
           Object.assign(img.style, {
             width: `${width}px`,
             maxWidth: null,
+            maxHeight: null,
           });
           break;
         case widthClamp.shrink:
           Object.assign(img.style, {
             width: null,
             maxWidth: `${width}px`,
+            maxHeight: null,
           });
           break;
         default:
           Object.assign(img.style, {
             width: null,
             maxWidth: null,
+            maxHeight: null,
           });
       }
     }
