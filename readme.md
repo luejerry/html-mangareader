@@ -8,14 +8,13 @@ I made this out of frustration with the bloat and clunkiness I experienced with 
 
 ## Features
 
-- View your images in a continously scrollable page.
+- View your images in a continuously scrollable page.
 - Use all the familiar navigation controls available on your browser/device setup.
 - Responsive and touch-friendly pagination controls also available for a more traditional viewing experience.
-- Open images in a folder or contained in a ZIP/CBZ/RAR/CBR file, of any format supported by the browser.
+- Open images in a folder or contained in a ZIP/CBZ/RAR/CBR/7Z/CB7 file, of any format supported by the browser.
 
 ### Planned features
 
-- 7z/CB7 support.
 - MacOS binary.
 
 ## Install (Windows)
@@ -41,6 +40,7 @@ Building the executable is done using [PyInstaller](https://www.pyinstaller.org/
 - Python 3.5+
 - PyInstaller: `pip install pyinstaller`
 - Rarfile: `pip install rarfile` or `pip install -r requirements.txt`
+- py7zr: `pip install py7zr` or `pip install -r requirements.txt`
 
 ### Building on Windows
 

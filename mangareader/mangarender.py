@@ -4,11 +4,13 @@ import tempfile
 import webbrowser
 import zipfile
 import rarfile
+import py7zr
 from pathlib import Path
 from string import Template
 from typing import List, Any, Union, Iterable
 from mangareader.excepts import ImagesNotFound
-from mangareader.templates import RAR_TYPES, ZIP_TYPES
+from mangareader.templates import RAR_TYPES, ZIP_TYPES, _7Z_TYPES
+from mangareader.sevenzipadapter import SevenZipAdapter
 from shutil import copy
 
 
@@ -85,7 +87,6 @@ def scan_directory(path: Union[str, Path], img_types: Iterable[str]) -> List[Pat
     Throws: `ImagesNotFound` if no images were found in the directory.
     """
     files = filter(lambda f: f.is_file(), Path(path).iterdir())
-    # files = filter(lambda f: os.path.isfile(os.path.join(path, f)), os.listdir(path))
     imagefiles = list(filter(lambda f: f.suffix.lower()[1:] in img_types, files))
     if not imagefiles:
         raise ImagesNotFound(f'No image files were found in directory "{Path(path).resolve()}"')
@@ -125,6 +126,7 @@ def extract_zip(
     * `ImagesNotFound` if no images were found in the archive.
     * `BadZipFile` if CBZ/ZIP archive could not be read.
     * `BadRarFile` if CBR/RAR archive could not be read.
+    * `Bad7zFile` if CB7/7Z archive could not be read.
     """
     file_ext = path.suffix.lower()[1:]
     try:
@@ -134,6 +136,9 @@ def extract_zip(
         elif file_ext in RAR_TYPES:
             with rarfile.RarFile(path, mode='r') as rar_file:
                 return extract_archive(img_types, rar_file)
+        elif file_ext in _7Z_TYPES:
+            with SevenZipAdapter(path, mode='r') as _7z_file:
+                return extract_archive(img_types, _7z_file)
         else:
             raise ImagesNotFound(f'Unknown archive format: {path}')
     except ImagesNotFound:
@@ -176,7 +181,9 @@ def extract_render(
     Returns: None.
 
     Throws:
-    * `BadZipFile`: if an opened file was not an image file, but could not be read as a zip archive.
+    * `BadZipFile`: opened file was a zip file, but could not be read.
+    * `BadRarFile`: opened file was a rar file, but could not be read.
+    * `Bad7zFile`: opened file was a 7z file, but could not be read.
     * `ImagesNotFound`: if no images could be found in an opened directory or archive.
     """
     start = 0
@@ -199,6 +206,10 @@ def extract_render(
                 except rarfile.BadRarFile as e:
                     raise rarfile.BadRarFile(
                         f'"{path}" does not appear to be a valid rar/cbr file.'
+                    ).with_traceback(e.__traceback__)
+                except py7zr.Bad7zFile as e:
+                    raise py7zr.Bad7zFile(
+                        f'"{path}" does not appear to be a valid 7z/cb7 file.'
                     ).with_traceback(e.__traceback__)
         else:
             imgpath = scan_directory(path, img_types)

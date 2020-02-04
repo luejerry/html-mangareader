@@ -1,4 +1,5 @@
 import sys
+import traceback
 from os import path
 from tkinter import Tk, messagebox, filedialog
 from mangareader.mangarender import extract_render
@@ -36,7 +37,9 @@ def main() -> None:
         )
     except Exception as e:
         Tk().withdraw()
-        messagebox.showerror('MangaReader encountered an error: ' + type(e).__name__, str(e))
+        messagebox.showerror(
+            'MangaReader encountered an error: ' + type(e).__name__, ''.join(traceback.format_exc())
+        )
 
 
 if __name__ == '__main__':
