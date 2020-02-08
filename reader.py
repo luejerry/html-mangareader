@@ -26,14 +26,17 @@ def main() -> None:
         target_path = '.' if len(sys.argv) <= 1 else sys.argv[1]
     working_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
     lib_dir = f'{working_dir}/mangareader'
+    with open('version', encoding='utf-8') as version_file:
+        version = version_file.read().strip()
     try:
         extract_render(
-            target_path,
-            f'{lib_dir}/doc.template.html',
-            f'{lib_dir}/img.template.html',
-            f'{lib_dir}/boot.template.html',
-            [f'{lib_dir}/styles.css', f'{lib_dir}/scripts.js', f'{lib_dir}/menu.svg',],
-            templates.DEFAULT_IMAGETYPES,
+            path=target_path,
+            version=version,
+            doc_template_path=f'{lib_dir}/doc.template.html',
+            page_template_path=f'{lib_dir}/img.template.html',
+            boot_template_path=f'{lib_dir}/boot.template.html',
+            asset_paths=[f'{lib_dir}/styles.css', f'{lib_dir}/scripts.js', f'{lib_dir}/menu.svg',],
+            img_types=templates.DEFAULT_IMAGETYPES,
         )
     except Exception as e:
         Tk().withdraw()

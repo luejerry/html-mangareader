@@ -128,3 +128,42 @@ img {
   background: rgba(0, 0, 0, 0.15);
   cursor: pointer;
 }
+
+#version {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  font-family: 'Franklin Gothic Regular', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: #d2d2d2;
+  text-shadow: white 1px 1px;
+}
+
+#update-toast {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 10px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 5px;
+  font-family: 'Franklin Gothic Regular', Arial, Helvetica, sans-serif;
+  transition: opacity 0.5s ease-out;
+  opacity: 0;
+  display: none;
+  z-index: 2;
+  color: #909090;
+  box-shadow: 0 0 14px 0 rgba(0, 0, 0, 0.17);
+}
+
+#update-toast:hover {
+  opacity: 1;
+}
+
+#update-toast.show {
+  opacity: 1;
+}
+
+#link-update {
+  color: #4985b5;
+}

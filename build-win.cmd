@@ -4,6 +4,7 @@ pyi-makespec --add-data="mangareader\styles.css;mangareader" ^
   --add-data="mangareader\doc.template.html;mangareader" ^
   --add-data="mangareader\img.template.html;mangareader" ^
   --add-data="mangareader\scripts.js;mangareader" ^
+  --add-data="version;." ^
   --add-data="unrar.exe;." ^
   --icon="symbols\air1.ico" ^
   --name="mangareader" ^

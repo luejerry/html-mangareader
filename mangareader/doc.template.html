@@ -2,10 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Images</title>
+    <title>${title} - Mangareader</title>
     <link rel="stylesheet" type="text/css" href="styles.css" />
   </head>
   <body>
+    <div id="version">${version}</div>
     ${pages}
     <div class="toolbar">
       <div class="menu-header">
@@ -19,6 +20,10 @@
         <button class="btn-smart-fit" data-fit-key="size0">Smart fit small</button>
         <button class="btn-smart-fit" data-fit-key="size1">Smart fit large</button>
       </div>
+    </div>
+    <div id="update-toast">
+      <span> A new version of Mangareader (<span id="next-version"></span>) is available. </span>
+      <a id="link-update" target="_blank">Download</a>
     </div>
     <script type="text/javascript" src="scripts.js"></script>
   </body>
