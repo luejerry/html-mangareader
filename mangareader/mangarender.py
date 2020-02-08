@@ -16,6 +16,8 @@ from shutil import copy
 
 def render_from_template(
     paths: Iterable[Union[Path, str]],
+    version: str,
+    title: str,
     doc_template: str,
     page_template: str,
     outfile: str = os.path.join(tempfile.gettempdir(), 'html-mangareader', 'render.html'),
@@ -24,6 +26,8 @@ def render_from_template(
 
     Parameters:
     * `paths`: full file:// paths to images to render on the page.
+    * `version`: version number to render on page.
+    * `title`: title of the page.
     * `doc_template`: HTML template for the overall document.
     * `page_template`: HTML template for each comic page element.
     * `outfile`: path to write the rendered document to. Defaults to OS temp directory.
@@ -45,7 +49,7 @@ def render_from_template(
             )
             for i in range(0, len(imagepaths))
         ]
-        doc_string = html_template.substitute(pages=''.join(img_list))
+        doc_string = html_template.substitute(pages=''.join(img_list), version=version, title=title)
         renderfd.write(doc_string)
     # print("view saved to " + outfile)
     return outfile
@@ -160,6 +164,7 @@ def create_out_path(outpath: Path) -> None:
 
 def extract_render(
     path: str,
+    version: str,
     doc_template_path: str,
     page_template_path: str,
     boot_template_path: str,
@@ -172,9 +177,11 @@ def extract_render(
 
     Parameters:
     * `path`: path to image, directory, or archive.
+    * `version`: version of the app to display to user.
     * `doc_template_path`: path to HTML template for the main document.
     * `page_template_path`: path to HTML template for individual comic page elements.
     * `boot_template_path`: path to HTML template for bootstrap document.
+    * `asset_paths`: paths of static assets to copy.
     * `image_types`: list of recognized image file extensions.
     * `outpath`: directory to write temporary files in. Defaults to OS temp directory.
 
@@ -194,11 +201,13 @@ def extract_render(
     try:
         if pPath.is_file():
             if pPath.suffix.lower()[1:] in img_types:
-                imgpath = scan_directory(pPath.parent, img_types)
-                start = imgpath.index(pPath)
+                imgpaths = scan_directory(pPath.parent, img_types)
+                start = imgpaths.index(pPath)
+                title = pPath.parent.name
             else:
                 try:
-                    imgpath = extract_zip(pPath, img_types, str(outpath))
+                    imgpaths = extract_zip(pPath, img_types, str(outpath))
+                    title = pPath.name
                 except zipfile.BadZipFile as e:
                     raise zipfile.BadZipfile(
                         f'"{path}" does not appear to be a valid zip/cbz file.'
@@ -212,14 +221,23 @@ def extract_render(
                         f'"{path}" does not appear to be a valid 7z/cb7 file.'
                     ).with_traceback(e.__traceback__)
         else:
-            imgpath = scan_directory(path, img_types)
+            imgpaths = scan_directory(path, img_types)
+            title = pPath.name
         create_out_path(outpath)
         render_copy(asset_paths, outpath)
         renderfile = render_from_template(
-            imgpath, doc_template, page_template, str(outpath / 'render.html')
+            paths=imgpaths,
+            version=version,
+            title=title,
+            doc_template=doc_template,
+            page_template=page_template,
+            outfile=str(outpath / 'render.html'),
         )
         bootfile = render_bootstrap(
-            str(outpath / 'boot.html'), Path(renderfile).as_uri(), start, boot_template
+            outfile=str(outpath / 'boot.html'),
+            render=Path(renderfile).as_uri(),
+            index=start,
+            boot_template=boot_template,
         )
         webbrowser.open(Path(bootfile).as_uri())
 
