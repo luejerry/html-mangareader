@@ -6,6 +6,7 @@ pyi-makespec --add-data="mangareader\styles.css;mangareader" ^
   --add-data="mangareader\scripts.js;mangareader" ^
   --add-data="mangareader\roboto-regular.woff2;mangareader" ^
   --add-data="mangareader\roboto-bold.woff2;mangareader" ^
+  --add-data="mangareader\zenscroll.js;mangareader" ^
   --add-data="version;." ^
   --add-data="unrar.exe;." ^
   --icon="symbols\air1.ico" ^

@@ -16,7 +16,6 @@ I made this out of frustration with the bloat and clunkiness I experienced with 
 ### Planned features
 
 - MacOS binary.
-- Smooth scroll when using next/prev controls.
 - UI improvements to View Options.
 
 ## Install (Windows)
