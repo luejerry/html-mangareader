@@ -1,5 +1,11 @@
 (function() {
   const versionCheckUrl = 'https://api.github.com/repos/luejerry/html-mangareader/contents/version';
+  const storageKey = 'mangareader-config';
+
+  const defaultConfig = {
+    smoothScroll: true,
+  };
+
   const widthClamp = {
     none: 'none',
     shrink: 'shrink',
@@ -39,6 +45,7 @@
   const shrinkWidthBtn = document.getElementById('btn-shrink-width');
   const fitWidthBtn = document.getElementById('btn-fit-width');
   const smartFitBtns = Array.from(document.getElementsByClassName('btn-smart-fit'));
+  const smoothScrollCheckbox = document.getElementById('input-smooth-scroll');
 
   let visiblePage;
 
@@ -53,9 +60,9 @@
           if (!index) {
             visiblePage = target;
             // Update the URL hash as user scrolls.
-            // Since we're using a file:// url, need to strip out the drive letter on Windows
-            const path = location.pathname.replace(/\/[A-Za-z]:/, '');
-            history.replaceState(null, '', `${path}#${target.id}`);
+            const url = new URL(location.href);
+            url.hash = target.id;
+            history.replaceState(null, '', url.toString());
           }
         });
     },
@@ -69,6 +76,37 @@
       orientation: ratio > 1 ? 'landscape' : 'portrait',
     };
   });
+
+  function readConfig() {
+    let config;
+    try {
+      // Unfortunately Edge does not allow localStorage access for file:// urls
+      config = localStorage.getItem(storageKey);
+    } catch (err) {
+      console.error(err);
+    }
+    return config ? JSON.parse(config) : defaultConfig;
+  }
+
+  function writeConfig(config) {
+    const oldConfig = readConfig();
+    const newConfig = Object.assign({}, oldConfig, config);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(newConfig));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function setupZenscroll() {
+    window.zenscroll.setup(170);
+    const config = readConfig();
+    if (config.smoothScroll) {
+      smoothScrollCheckbox.checked = true;
+    } else {
+      window.pauseZenscroll = true;
+    }
+  }
 
   function asyncTimeout(millis) {
     return new Promise((resolve, reject) => {
@@ -144,6 +182,13 @@
     visiblePage.scrollIntoView({ behavior: 'smooth' });
   }
 
+  function handleSmoothScroll(event) {
+    window.pauseZenscroll = !event.target.checked;
+    writeConfig({
+      smoothScroll: event.target.checked,
+    });
+  }
+
   function setupListeners() {
     originalWidthBtn.addEventListener('click', handleOriginalWidth);
     shrinkWidthBtn.addEventListener('click', handleShrinkWidth);
@@ -151,6 +196,7 @@
     for (const button of smartFitBtns) {
       button.addEventListener('click', handleSmartWidth);
     }
+    smoothScrollCheckbox.addEventListener('change', handleSmoothScroll);
   }
 
   function attachIntersectObservers() {
@@ -206,6 +252,7 @@
   }
 
   function main() {
+    setupZenscroll();
     setupListeners();
     attachIntersectObservers();
     checkVersion();
