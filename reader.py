@@ -10,7 +10,9 @@ from time import sleep
 def main() -> None:
     if len(sys.argv) <= 1:
         imagetypes = ';'.join(f'*.{ext}' for ext in templates.DEFAULT_IMAGETYPES)
-        archivetypes = '*.cbz;*.zip'
+        archivetypes = ';'.join(
+            f'*.{ext}' for ext in (*templates.ZIP_TYPES, *templates.RAR_TYPES, *templates._7Z_TYPES)
+        )
         filetypes = (
             ('Supported files', ';'.join((imagetypes, archivetypes))),
             ('Images', imagetypes),
