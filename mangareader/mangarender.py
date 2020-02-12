@@ -45,7 +45,10 @@ def render_from_template(
         img_template = Template(page_template)
         img_list = [
             img_template.substitute(
-                img=imagepaths[i], id=str(i), previd=str(i - 1), nextid=str(i + 1)
+                img=imagepaths[i],
+                id=str(i),
+                previd=str(i - 1) if i > 0 else 'none',
+                nextid=str(i + 1) if i < len(imagepaths) - 1 else 'none',
             )
             for i in range(0, len(imagepaths))
         ]

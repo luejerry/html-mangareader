@@ -37,7 +37,7 @@ def main() -> None:
             doc_template_path=f'{lib_dir}/doc.template.html',
             page_template_path=f'{lib_dir}/img.template.html',
             boot_template_path=f'{lib_dir}/boot.template.html',
-            asset_paths=[f'{lib_dir}/styles.css', f'{lib_dir}/scripts.js', f'{lib_dir}/menu.svg',],
+            asset_paths=(f'{lib_dir}/{asset}' for asset in templates.ASSETS),
             img_types=templates.DEFAULT_IMAGETYPES,
         )
     except Exception as e:
