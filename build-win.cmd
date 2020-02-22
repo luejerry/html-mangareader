@@ -9,7 +9,7 @@ pyi-makespec --add-data="mangareader\styles.css;mangareader" ^
   --add-data="mangareader\zenscroll.js;mangareader" ^
   --add-data="version;." ^
   --add-data="unrar.exe;." ^
-  --icon="symbols\air1.ico" ^
+  --icon="icon\air1.ico" ^
   --name="mangareader" ^
   --noconsole ^
 reader.py && ^
