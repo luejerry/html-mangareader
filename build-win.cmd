@@ -1,5 +1,6 @@
 pyi-makespec --add-data="mangareader\styles.css;mangareader" ^
   --add-data="mangareader\menu.svg;mangareader" ^
+  --add-data="mangareader\menu-light.svg;mangareader" ^
   --add-data="mangareader\boot.template.html;mangareader" ^
   --add-data="mangareader\doc.template.html;mangareader" ^
   --add-data="mangareader\img.template.html;mangareader" ^

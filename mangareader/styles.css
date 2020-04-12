@@ -17,22 +17,64 @@
 }
 
 body {
-  background-color: #f0f0f0;
+  --body-bg-color: #f0f0f0;
+  --img-border-color: #dddddd;
+  --arrow-color: #888888;
+  --toolbar-bg-color: 255, 255, 255;
+  --toolbar-title-color: 96, 96, 96;
+  --text-color: black;
+  --toggle-background-color: #f0f0f0;
+  --toggle-background-color-checked: #e0e0e0;
+  --toggle-nib-color: #c0c0c0;
+  --toggle-nib-color-checked: #848484;
+  --menu-subtitle-color: #808080;
+  --menu-icon: url('menu.svg');
+  --page-vertical-margin: 50px;
+  background-color: var(--body-bg-color);
   font-family: Roboto, sans-serif;
+  color: var(--text-color);
+}
+
+body.dark {
+  --body-bg-color: #2c292d;
+  --img-border-color: #2c292d;
+  --arrow-color: #888888;
+  --toolbar-bg-color: 64, 61, 65;
+  --toolbar-title-color: 192, 192, 192;
+  --text-color: #ccc;
+  --toggle-background-color: #585858;
+  --toggle-background-color-checked: #808080;
+  --toggle-nib-color: #4a4a4a;
+  --toggle-nib-color-checked: #4a4a4a;
+  --menu-subtitle-color: #8c8c8c;
+  --menu-icon: url('menu-light.svg');
+}
+
+body.seamless {
+  --page-vertical-margin: 0;
 }
 
 /* Override user agent stylesheet */
 button,
 input {
   font-family: Roboto, sans-serif;
+  color: var(--text-color);
 }
 
-img {
+.image {
   box-shadow: 0px 2px 7px 0px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   border-style: solid;
   border-width: 1px;
-  border-color: #dddddd;
+  border-color: var(--img-border-color);
+  display: block;
+  margin: auto;
+}
+
+.seamless .image {
+  box-shadow: none;
+  border-radius: 0;
+  border: none;
 }
 
 a[href='#_none'] {
@@ -69,7 +111,7 @@ a[href='#_none'] {
 .page {
   position: relative;
   text-align: center;
-  margin: 50px 0;
+  margin-top: var(--page-vertical-margin);
 }
 
 .arrow {
@@ -77,7 +119,7 @@ a[href='#_none'] {
   top: 50%;
   margin-top: -50px;
   z-index: -1;
-  color: #888888;
+  color: var(--arrow-color);
   font-size: 80px;
 }
 
@@ -94,16 +136,23 @@ a[href='#_none'] {
   top: 0;
   left: 0;
   z-index: 2;
-  transition: background 0.2s;
-  background: rgba(255, 255, 255, 0);
+  transition: background 0.2s, height 0.2s;
+  background: rgba(var(--toolbar-bg-color), 0);
+  height: 180px;
+  overflow: hidden;
 }
 
 .toolbar:hover {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(var(--toolbar-bg-color), 1);
+  box-shadow: 0 0 16px 2px rgba(0, 0, 0, 0.17);
+
+  /* Note: this is the exact height of the menu. Must be explicitly set in order to animate
+  height transition */
+  height: 474px;
 }
 
 .toolbar .menu-icon {
-  background: url(menu.svg);
+  background: var(--menu-icon);
   background-size: cover;
   width: 32px;
   height: 32px;
@@ -123,7 +172,7 @@ a[href='#_none'] {
 
 .toolbar .menu-title {
   font-weight: bold;
-  color: rgb(96, 96, 96);
+  color: rgb(var(--toolbar-title-color));
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -156,6 +205,13 @@ a[href='#_none'] {
   cursor: pointer;
 }
 
+.menu-subtitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--menu-subtitle-color);
+  padding: 16px 0 12px 24px;
+}
+
 label {
   font-size: 14px;
 }
@@ -180,14 +236,14 @@ label {
   left: 0;
   width: 20px;
   height: 12px;
-  background: #f0f0f0;
+  background: var(--toggle-background-color);
   box-sizing: border-box;
   border-radius: 6px;
   transition: all 0.3s;
 }
 
 .label-toggle .input-toggle:checked + *::before {
-  background: #e0e0e0;
+  background: var(--toggle-background-color-checked);
 }
 
 .label-toggle .input-toggle + *::after {
@@ -196,7 +252,7 @@ label {
   position: absolute;
   top: calc(50% - 4px);
   left: 2px;
-  background: #c0c0c0;
+  background: var(--toggle-nib-color);
   width: 8px;
   height: 8px;
   border-radius: 5px;
@@ -206,7 +262,7 @@ label {
 
 .label-toggle .input-toggle:checked + *::after {
   transform: translateX(8px);
-  background: #848484;
+  background: var(--toggle-nib-color-checked);
 }
 
 #version {
@@ -224,7 +280,7 @@ label {
   right: 0;
   margin: 10px;
   padding: 12px 16px;
-  background: white;
+  background: rgba(var(--toolbar-bg-color), 1);
   border-radius: 5px;
   transition: opacity 0.5s ease-out;
   opacity: 0;

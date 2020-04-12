@@ -1,9 +1,11 @@
-(function() {
+(function () {
   const versionCheckUrl = 'https://api.github.com/repos/luejerry/html-mangareader/contents/version';
   const storageKey = 'mangareader-config';
 
   const defaultConfig = {
     smoothScroll: true,
+    darkMode: false,
+    seamless: false,
   };
 
   const widthClamp = {
@@ -46,16 +48,18 @@
   const fitWidthBtn = document.getElementById('btn-fit-width');
   const smartFitBtns = Array.from(document.getElementsByClassName('btn-smart-fit'));
   const smoothScrollCheckbox = document.getElementById('input-smooth-scroll');
+  const darkModeCheckbox = document.getElementById('input-dark-mode');
+  const seamlessCheckbox = document.getElementById('input-seamless');
 
   let visiblePage;
 
   const intersectThreshold = 0.2;
   const intersectObserver = new IntersectionObserver(
-    entries => {
+    (entries) => {
       entries
-        .filter(entry => entry.intersectionRatio > intersectThreshold)
+        .filter((entry) => entry.intersectionRatio > intersectThreshold)
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-        .map(entry => entry.target)
+        .map((entry) => entry.target)
         .forEach((target, index) => {
           if (!index) {
             visiblePage = target;
@@ -69,7 +73,7 @@
     { threshold: [intersectThreshold] },
   );
 
-  const imagesMeta = images.map(image => {
+  const imagesMeta = images.map((image) => {
     const ratio = image.naturalWidth / image.naturalHeight;
     return {
       image,
@@ -98,13 +102,38 @@
     }
   }
 
-  function setupZenscroll() {
-    window.zenscroll.setup(170);
+  function loadSettings() {
     const config = readConfig();
+    setupZenscroll(config);
+    setupDarkMode(config);
+    setupSeamless(config);
+  }
+
+  function setupZenscroll(config) {
+    window.zenscroll.setup(170);
     if (config.smoothScroll) {
       smoothScrollCheckbox.checked = true;
     } else {
       window.pauseZenscroll = true;
+    }
+  }
+
+  function setupDarkMode(config) {
+    darkModeCheckbox.checked = config.darkMode;
+    // Setting `checked` does not fire the `change` event, so we must dispatch it manually
+    if (config.darkMode) {
+      const change = document.createEvent('Event');
+      change.initEvent('change', false, true);
+      darkModeCheckbox.dispatchEvent(change);
+    }
+  }
+
+  function setupSeamless(config) {
+    seamlessCheckbox.checked = config.seamless;
+    if (config.seamless) {
+      const change = document.createEvent('Event');
+      change.initEvent('change', false, true);
+      seamlessCheckbox.dispatchEvent(change);
     }
   }
 
@@ -189,6 +218,31 @@
     });
   }
 
+  function handleDarkMode(event) {
+    const darkModeEnabled = event.target.checked;
+    if (darkModeEnabled) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+    writeConfig({
+      darkMode: darkModeEnabled,
+    });
+  }
+
+  function handleSeamless(event) {
+    const seamlessEnabled = event.target.checked;
+    if (seamlessEnabled) {
+      document.body.classList.add('seamless');
+    } else {
+      document.body.classList.remove('seamless');
+    }
+    writeConfig({
+      seamless: seamlessEnabled,
+    });
+    visiblePage.scrollIntoView();
+  }
+
   function setupListeners() {
     originalWidthBtn.addEventListener('click', handleOriginalWidth);
     shrinkWidthBtn.addEventListener('click', handleShrinkWidth);
@@ -197,6 +251,8 @@
       button.addEventListener('click', handleSmartWidth);
     }
     smoothScrollCheckbox.addEventListener('change', handleSmoothScroll);
+    darkModeCheckbox.addEventListener('change', handleDarkMode);
+    seamlessCheckbox.addEventListener('change', handleSeamless);
   }
 
   function attachIntersectObservers() {
@@ -206,7 +262,7 @@
   }
 
   async function checkVersion() {
-    const response = await fetch(versionCheckUrl, { method: 'GET', mode: 'cors' }).then(r =>
+    const response = await fetch(versionCheckUrl, { method: 'GET', mode: 'cors' }).then((r) =>
       r.json(),
     );
     const remoteVersion = atob(response.content);
@@ -233,8 +289,8 @@
    * @param {string} target
    */
   function versionComparator(source, target) {
-    const sourceParts = source.split('.').map(num => parseInt(num, 10));
-    const targetParts = target.split('.').map(num => parseInt(num, 10));
+    const sourceParts = source.split('.').map((num) => parseInt(num, 10));
+    const targetParts = target.split('.').map((num) => parseInt(num, 10));
 
     const recursor = (s, t) => {
       if (!s.length && !t.length) {
@@ -252,8 +308,8 @@
   }
 
   function main() {
-    setupZenscroll();
     setupListeners();
+    loadSettings();
     attachIntersectObservers();
     checkVersion();
   }

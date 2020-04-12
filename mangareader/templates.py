@@ -7,6 +7,7 @@ ASSETS = {
     'scripts.js',
     'zenscroll.js',
     'menu.svg',
+    'menu-light.svg',
     'roboto-bold.woff2',
     'roboto-regular.woff2',
 }
