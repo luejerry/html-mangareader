@@ -1,5 +1,7 @@
 import sys
 import traceback
+import webbrowser
+from argparse import ArgumentParser, Namespace
 from os import path
 from tkinter import Tk, messagebox, filedialog
 from mangareader.mangarender import extract_render
@@ -7,8 +9,16 @@ from mangareader import templates
 from time import sleep
 
 
+def parse_args() -> Namespace:
+    parser = ArgumentParser(description='Mangareader')
+    parser.add_argument('path', nargs='?', help='Path to image, folder, or comic book archive')
+    parser.add_argument('--no-browser', action='store_true')
+    return parser.parse_args()
+
+
 def main() -> None:
-    if len(sys.argv) <= 1:
+    args = parse_args()
+    if not args.path:
         imagetypes = ';'.join(f'*.{ext}' for ext in templates.DEFAULT_IMAGETYPES)
         archivetypes = ';'.join(
             f'*.{ext}' for ext in (*templates.ZIP_TYPES, *templates.RAR_TYPES, *templates._7Z_TYPES)
@@ -25,13 +35,13 @@ def main() -> None:
         if not target_path:
             return
     else:
-        target_path = '.' if len(sys.argv) <= 1 else sys.argv[1]
+        target_path = args.path
     working_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
     lib_dir = f'{working_dir}/mangareader'
     with open(f'{working_dir}/version', encoding='utf-8') as version_file:
         version = version_file.read().strip()
     try:
-        extract_render(
+        boot_path = extract_render(
             path=target_path,
             version=version,
             doc_template_path=f'{lib_dir}/doc.template.html',
@@ -40,10 +50,14 @@ def main() -> None:
             asset_paths=(f'{lib_dir}/{asset}' for asset in templates.ASSETS),
             img_types=templates.DEFAULT_IMAGETYPES,
         )
+        if args.no_browser:
+            print(boot_path)
+        else:
+            webbrowser.open(boot_path.as_uri())
     except Exception as e:
         Tk().withdraw()
         messagebox.showerror(
-            'MangaReader encountered an error: ' + type(e).__name__, ''.join(traceback.format_exc())
+            'Mangareader encountered an error: ' + type(e).__name__, ''.join(traceback.format_exc())
         )
 
 

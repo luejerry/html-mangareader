@@ -1,7 +1,6 @@
 import os
 import re
 import tempfile
-import webbrowser
 import zipfile
 import rarfile
 import py7zr
@@ -174,7 +173,7 @@ def extract_render(
     asset_paths: Iterable[str],
     img_types: Iterable[str],
     outpath: Path = Path(tempfile.gettempdir()) / 'html-mangareader',
-) -> None:
+) -> Path:
     """Main controller procedure. Handles opening of archive, image, or directory and renders the images
     appropriately for each, then opens the document in the user's default browser.
 
@@ -188,7 +187,7 @@ def extract_render(
     * `image_types`: list of recognized image file extensions.
     * `outpath`: directory to write temporary files in. Defaults to OS temp directory.
 
-    Returns: None.
+    Returns: Path to the bootstrap document, which can be opened in a web browser.
 
     Throws:
     * `BadZipFile`: opened file was a zip file, but could not be read.
@@ -242,7 +241,7 @@ def extract_render(
             index=start,
             boot_template=boot_template,
         )
-        webbrowser.open(Path(bootfile).as_uri())
+        return Path(bootfile)
 
     except ImagesNotFound:
         raise
