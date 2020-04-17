@@ -8,6 +8,8 @@ ASSETS = {
     'zenscroll.js',
     'menu.svg',
     'menu-light.svg',
+    'scroll.svg',
+    'scroll-light.svg',
     'roboto-bold.woff2',
     'roboto-regular.woff2',
 }
