@@ -40,10 +40,10 @@ body {
 }
 
 body.dark {
-  --body-bg-color: #2c292d;
-  --img-border-color: #2c292d;
+  --body-bg-color: black;
+  --img-border-color: black;
   --arrow-color: #888888;
-  --toolbar-bg-color: 64, 61, 65;
+  --toolbar-bg-color: 44, 41, 45;
   --toolbar-title-color: 192, 192, 192;
   --text-color: #ccc;
   --toggle-background-color: #585858;
