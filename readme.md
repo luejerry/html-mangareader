@@ -12,6 +12,7 @@ I made this out of frustration with the bloat and clunkiness I experienced with 
 - Use all the familiar navigation controls available on your browser/device setup.
 - Responsive and touch-friendly pagination controls also available for a more traditional viewing experience.
 - Open images in a folder or contained in a ZIP/CBZ/RAR/CBR/7Z/CB7 file, of any format supported by the browser.
+- Light and dark themes.
 
 ### Planned features
 
