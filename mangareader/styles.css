@@ -203,6 +203,7 @@ a[href='#_none'] {
   border: none;
   text-align: left;
   font-size: 14px;
+  margin: 0;
 }
 
 .menu-items button:hover {
