@@ -233,7 +233,7 @@ def extract_render(
             title=title,
             doc_template=doc_template,
             page_template=page_template,
-            outfile=str(outpath / 'render.html'),
+            outfile=str(outpath / 'index.html'),
         )
         bootfile = render_bootstrap(
             outfile=str(outpath / 'boot.html'),
