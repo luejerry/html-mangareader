@@ -38,7 +38,7 @@
 
 /*global define */
 
-(function(root, factory) {
+(function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define([], factory());
   } else if (typeof module === 'object' && module.exports) {
@@ -54,11 +54,11 @@
       }
     })();
   }
-})(this, function() {
+})(this, function () {
   'use strict';
 
   // Detect if the browser already supports native smooth scrolling (e.g., Firefox 36+ and Chrome 49+) and it is enabled:
-  const isNativeSmoothScrollEnabledOn = function(elem) {
+  const isNativeSmoothScrollEnabledOn = function (elem) {
     return (
       elem &&
       'getComputedStyle' in window &&
@@ -71,7 +71,7 @@
     return {};
   }
 
-  const makeScroller = function(container, defaultDuration, edgeOffset) {
+  const makeScroller = function (container, defaultDuration, edgeOffset) {
     // Use defaults if not provided
     defaultDuration = defaultDuration || 999; //ms
     if (!edgeOffset && edgeOffset !== 0) {
@@ -81,19 +81,19 @@
 
     // Handling the life-cycle of the scroller
     let scrollTimeoutId;
-    const setScrollTimeoutId = function(newValue) {
+    const setScrollTimeoutId = function (newValue) {
       scrollTimeoutId = newValue;
     };
 
     /**
      * Stop the current smooth scroll operation immediately
      */
-    const stopScroll = function() {
-      clearTimeout(scrollTimeoutId);
+    const stopScroll = function () {
+      cancelAnimationFrame(scrollTimeoutId);
       setScrollTimeoutId(0);
     };
 
-    const getTopWithEdgeOffset = function(elem) {
+    const getTopWithEdgeOffset = function (elem) {
       return Math.max(0, container.getTopOf(elem) - edgeOffset);
     };
 
@@ -105,7 +105,7 @@
      *        If not provided the default duration is used.
      * @param {onDone} An optional callback function to be invoked once the scroll finished.
      */
-    const scrollToY = function(targetY, duration, onDone) {
+    const scrollToY = function (targetY, duration, onDone) {
       stopScroll();
       if (
         duration === 0 ||
@@ -121,27 +121,26 @@
         const distance = Math.max(0, targetY) - startY;
         const startTime = new Date().getTime();
         duration = duration || Math.min(Math.abs(distance), defaultDuration);
-        (function loopScroll() {
-          setScrollTimeoutId(
-            setTimeout(function() {
-              // Calculate percentage:
-              const p = Math.min(1, (new Date().getTime() - startTime) / duration);
-              // Calculate the absolute vertical position:
-              const y = Math.max(
-                0,
-                Math.floor(startY + distance * (p < 0.5 ? 2 * p * p : p * (4 - p * 2) - 1)),
-              );
-              container.toY(y);
-              if (p < 1 && container.getHeight() + y < container.body.scrollHeight) {
-                loopScroll();
-              } else {
-                setTimeout(stopScroll, 99); // with cooldown time
-                if (onDone) {
-                  onDone();
-                }
-              }
-            }, 9),
+        const task = () => {
+          // Calculate percentage:
+          const p = Math.min(1, (new Date().getTime() - startTime) / duration);
+          // Calculate the absolute vertical position:
+          const y = Math.max(
+            0,
+            Math.floor(startY + distance * (p < 0.5 ? 2 * p * p : p * (4 - p * 2) - 1)),
           );
+          container.toY(y);
+          if (p < 1 && container.getHeight() + y < container.body.scrollHeight) {
+            setScrollTimeoutId(requestAnimationFrame(task));
+          } else {
+            setTimeout(stopScroll, 99); // with cooldown time
+            if (onDone) {
+              onDone();
+            }
+          }
+        };
+        (function loopScroll() {
+          setScrollTimeoutId(requestAnimationFrame(task));
         })();
       }
     };
@@ -153,7 +152,7 @@
      * @param {duration} Optionally the duration of the scroll operation.
      * @param {onDone} An optional callback function to be invoked once the scroll finished.
      */
-    const scrollToElem = function(elem, duration, onDone) {
+    const scrollToElem = function (elem, duration, onDone) {
       scrollToY(getTopWithEdgeOffset(elem), duration, onDone);
     };
 
@@ -164,7 +163,7 @@
      * @param {duration} Optionally the duration of the scroll operation.
      * @param {onDone} An optional callback function to be invoked once the scroll finished.
      */
-    const scrollIntoView = function(elem, duration, onDone) {
+    const scrollIntoView = function (elem, duration, onDone) {
       const elemHeight = elem.getBoundingClientRect().height;
       const elemBottom = container.getTopOf(elem) + elemHeight;
       const containerHeight = container.getHeight();
@@ -190,7 +189,7 @@
      *        A value of 0 is ignored.
      * @param {onDone} An optional callback function to be invoked once the scroll finished.
      */
-    const scrollToCenterOf = function(elem, duration, offset, onDone) {
+    const scrollToCenterOf = function (elem, duration, offset, onDone) {
       scrollToY(
         Math.max(
           0,
@@ -211,7 +210,7 @@
      * @param {newEdgeOffset} Optionally a new value for the edge offset, used by each scroll method by default. Ignored if null or undefined.
      * @returns An object with the current values.
      */
-    const setup = function(newDefaultDuration, newEdgeOffset) {
+    const setup = function (newDefaultDuration, newEdgeOffset) {
       if (newDefaultDuration === 0 || newDefaultDuration) {
         defaultDuration = newDefaultDuration;
       }
@@ -231,7 +230,7 @@
       intoView: scrollIntoView,
       center: scrollToCenterOf,
       stop: stopScroll,
-      moving: function() {
+      moving: function () {
         return Boolean(scrollTimeoutId);
       },
       getY: container.getY,
@@ -240,21 +239,21 @@
   };
 
   const docElem = document.documentElement;
-  const getDocY = function() {
+  const getDocY = function () {
     return window.scrollY || docElem.scrollTop;
   };
 
   // Create a scroller for the document:
   const zenscroll = makeScroller({
     body: document.scrollingElement || document.body,
-    toY: function(y) {
+    toY: function (y) {
       window.scrollTo(0, y);
     },
     getY: getDocY,
-    getHeight: function() {
+    getHeight: function () {
       return window.innerHeight || docElem.clientHeight;
     },
-    getTopOf: function(elem) {
+    getTopOf: function (elem) {
       return elem.getBoundingClientRect().top + getDocY() - docElem.offsetTop;
     },
   });
@@ -269,20 +268,20 @@
    *        Ignored if null or undefined.
    * @returns A scroller object, similar to `zenscroll` but controlling the provided element.
    */
-  zenscroll.createScroller = function(scrollContainer, defaultDuration, edgeOffset) {
+  zenscroll.createScroller = function (scrollContainer, defaultDuration, edgeOffset) {
     return makeScroller(
       {
         body: scrollContainer,
-        toY: function(y) {
+        toY: function (y) {
           scrollContainer.scrollTop = y;
         },
-        getY: function() {
+        getY: function () {
           return scrollContainer.scrollTop;
         },
-        getHeight: function() {
+        getHeight: function () {
           return Math.min(scrollContainer.clientHeight, window.innerHeight || docElem.clientHeight);
         },
-        getTopOf: function(elem) {
+        getTopOf: function (elem) {
           return elem.offsetTop;
         },
       },
@@ -308,15 +307,15 @@
 
     window.addEventListener(
       'load',
-      function() {
+      function () {
         if (isScrollRestorationSupported) {
           // Set it to manual
-          setTimeout(function() {
+          setTimeout(function () {
             history.scrollRestoration = 'manual';
           }, 9);
           window.addEventListener(
             'popstate',
-            function(event) {
+            function (event) {
               if (window.pauseZenscroll) {
                 return;
               }
@@ -331,7 +330,7 @@
         // Add edge offset on first load if necessary
         // This may not work on IE (or older computer?) as it requires more timeout, around 100 ms
         if (window.location.hash) {
-          setTimeout(function() {
+          setTimeout(function () {
             // Adjustment is only needed if there is an edge offset:
             const edgeOffset = zenscroll.setup().edgeOffset;
             if (edgeOffset) {
@@ -355,7 +354,7 @@
     const RE_noZensmooth = new RegExp('(^|\\s)noZensmooth(\\s|$)');
     window.addEventListener(
       'click',
-      function(event) {
+      function (event) {
         if (window.pauseZenscroll) {
           return;
         }
@@ -399,7 +398,7 @@
           }
           event.preventDefault();
           // By default trigger the browser's `hashchange` event...
-          let onDone = function() {
+          let onDone = function () {
             window.location = href;
           };
           // ...unless there is an edge offset specified
