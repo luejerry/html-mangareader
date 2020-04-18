@@ -11,7 +11,7 @@
     seamless: false,
   };
 
-  const widthClamp = {
+  const screenClamp = {
     none: 'none',
     shrink: 'shrink',
     fit: 'fit',
@@ -164,8 +164,11 @@
   const pages = Array.from(document.getElementsByClassName('page'));
   const images = Array.from(document.getElementsByClassName('image'));
   const originalWidthBtn = document.getElementById('btn-original-width');
+  const shrinkSizeBtn = document.getElementById('btn-shrink-size');
   const shrinkWidthBtn = document.getElementById('btn-shrink-width');
+  const shrinkHeightBtn = document.getElementById('btn-shrink-height');
   const fitWidthBtn = document.getElementById('btn-fit-width');
+  const fitHeightBtn = document.getElementById('btn-fit-height');
   const smartFitBtns = Array.from(document.getElementsByClassName('btn-smart-fit'));
   const smoothScrollCheckbox = document.getElementById('input-smooth-scroll');
   const darkModeCheckbox = document.getElementById('input-dark-mode');
@@ -262,16 +265,32 @@
     return document.documentElement.clientWidth;
   }
 
-  function handleOriginalWidth() {
-    setImagesWidth(widthClamp.none, getWidth());
+  function getHeight() {
+    return document.documentElement.clientHeight;
+  }
+
+  function handleOriginalSize() {
+    setImagesWidth(screenClamp.none, getWidth());
+  }
+
+  function handleShrinkSize() {
+    setImagesDimensions(screenClamp.shrink, getWidth(), getHeight());
   }
 
   function handleFitWidth() {
-    setImagesWidth(widthClamp.fit, getWidth());
+    setImagesWidth(screenClamp.fit, getWidth());
+  }
+
+  function handleFitHeight() {
+    setImagesHeight(screenClamp.fit, getHeight());
   }
 
   function handleShrinkWidth() {
-    setImagesWidth(widthClamp.shrink, getWidth());
+    setImagesWidth(screenClamp.shrink, getWidth());
+  }
+
+  function handleShrinkHeight() {
+    setImagesHeight(screenClamp.shrink, getHeight());
   }
 
   function handleSmartWidth(event) {
@@ -282,17 +301,19 @@
   function setImagesWidth(fitMode, width) {
     for (const img of images) {
       switch (fitMode) {
-        case widthClamp.fit:
+        case screenClamp.fit:
           Object.assign(img.style, {
             width: `${width}px`,
             maxWidth: null,
+            height: null,
             maxHeight: null,
           });
           break;
-        case widthClamp.shrink:
+        case screenClamp.shrink:
           Object.assign(img.style, {
             width: null,
             maxWidth: `${width}px`,
+            height: null,
             maxHeight: null,
           });
           break;
@@ -300,6 +321,64 @@
           Object.assign(img.style, {
             width: null,
             maxWidth: null,
+            height: null,
+            maxHeight: null,
+          });
+      }
+    }
+    visiblePage.scrollIntoView();
+  }
+
+  function setImagesHeight(fitMode, height) {
+    for (const img of images) {
+      switch (fitMode) {
+        case screenClamp.fit:
+          Object.assign(img.style, {
+            height: `${height}px`,
+            maxWidth: null,
+            width: null,
+            maxHeight: null,
+          });
+          break;
+        case screenClamp.shrink:
+          Object.assign(img.style, {
+            width: null,
+            maxHeight: `${height}px`,
+            height: null,
+            maxWidth: null,
+          });
+          break;
+        default:
+          Object.assign(img.style, {
+            width: null,
+            maxWidth: null,
+            height: null,
+            maxHeight: null,
+          });
+      }
+    }
+    visiblePage.scrollIntoView();
+  }
+
+  function setImagesDimensions(fitMode, width, height) {
+    for (const img of images) {
+      switch (fitMode) {
+        case screenClamp.fit:
+          // Not implemented
+          break;
+        case screenClamp.shrink:
+          Object.assign(img.style, {
+            width: null,
+            maxHeight: `${height}px`,
+            height: null,
+            maxWidth: `${width}px`,
+          });
+          break;
+        default:
+          Object.assign(img.style, {
+            width: null,
+            maxWidth: null,
+            height: null,
             maxHeight: null,
           });
       }
@@ -312,12 +391,17 @@
       switch (orient) {
         case orientation.portrait:
           Object.assign(img.style, {
+            width: null,
+            maxWidth: null,
+            height: null,
             maxHeight: `${fitMode.portrait.height}px`,
           });
           break;
         case orientation.landscape:
           Object.assign(img.style, {
+            width: null,
             maxWidth: `${getWidth()}px`,
+            height: null,
             maxHeight: `${fitMode.landscape.height}px`,
           });
           break;
@@ -359,9 +443,13 @@
   }
 
   function setupListeners() {
-    originalWidthBtn.addEventListener('click', handleOriginalWidth);
+    originalWidthBtn.addEventListener('click', handleOriginalSize);
+    shrinkSizeBtn.addEventListener('click', handleShrinkSize);
     shrinkWidthBtn.addEventListener('click', handleShrinkWidth);
+    shrinkHeightBtn.addEventListener('click', handleShrinkHeight);
     fitWidthBtn.addEventListener('click', handleFitWidth);
+    fitHeightBtn.addEventListener('click', handleFitHeight);
+
     for (const button of smartFitBtns) {
       button.addEventListener('click', handleSmartWidth);
     }
