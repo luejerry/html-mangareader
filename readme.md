@@ -2,13 +2,13 @@
 
 **See [Releases](https://github.com/luejerry/html-mangareader/releases) for the latest downloads and changelogs.**
 
+**[Try the demo in your browser.](https://luejerry.github.io/html-mangareader-demo)**
+
 Mangareader is a simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ/RAR/CBR archive as a single, continuously scrollable page in your default browser.
 
 I made this out of frustration with the bloat and clunkiness I experienced with other comic book readers I've tried for the Windows platform. If you need features like bookmarks, history, library management, cloud sync, etc. this is not the comic reader for you. This app is focused only on simplicity and speed.
 
 ![Smooth scroll version on Windows 10](https://github.com/luejerry/html-mangareader/blob/master/doc/demo.gif)
-
-**Not convinced? [Try the demo in your browser.](https://luejerry.github.io/html-mangareader-demo)**
 
 ## Features
 
