@@ -3,13 +3,18 @@ ZIP_TYPES = {'zip', 'cbz'}
 RAR_TYPES = {'rar', 'cbr'}
 _7Z_TYPES = {'7z', 'cb7'}
 ASSETS = {
-    'styles.css',
-    'scripts.js',
-    'zenscroll.js',
-    'menu.svg',
-    'menu-light.svg',
-    'scroll.svg',
-    'scroll-light.svg',
-    'roboto-bold.woff2',
-    'roboto-regular.woff2',
+    'build/styles.css',
+    'build/scripts.js',
+    'static-assets/zenscroll.js',
+    'static-assets/menu.svg',
+    'static-assets/menu-light.svg',
+    'static-assets/scroll.svg',
+    'static-assets/scroll-light.svg',
+    'static-assets/roboto-bold.woff2',
+    'static-assets/roboto-regular.woff2',
+}
+HTML_TEMPLATES = {
+    'doc': 'static-assets/doc.template.html',
+    'page': 'static-assets/img.template.html',
+    'boot': 'static-assets/boot.template.html',
 }

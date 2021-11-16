@@ -44,9 +44,9 @@ def main() -> None:
         boot_path = extract_render(
             path=target_path,
             version=version,
-            doc_template_path=f'{lib_dir}/doc.template.html',
-            page_template_path=f'{lib_dir}/img.template.html',
-            boot_template_path=f'{lib_dir}/boot.template.html',
+            doc_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["doc"]}',
+            page_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["page"]}',
+            boot_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["boot"]}',
             asset_paths=(f'{lib_dir}/{asset}' for asset in templates.ASSETS),
             img_types=templates.DEFAULT_IMAGETYPES,
         )

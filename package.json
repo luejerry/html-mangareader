@@ -1,8 +1,16 @@
 {
+  "type": "module",
+  "scripts": {
+    "compile": "node build.js --no-browser",
+    "compile:watch": "node build.js --no-browser --watch",
+    "start": "node build.js",
+    "watch": "node build.js --watch"
+  },
   "devDependencies": {
     "chokidar": "^3.5.2",
-    "eslint": "^6.7.2",
+    "eslint": "^8.2.0",
+    "prettier": "^2.7.1",
     "sass": "^1.43.4",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.2"
   }
 }

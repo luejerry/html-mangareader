@@ -23,3 +23,14 @@ interface FitDimensions {
     width?: number;
   };
 }
+
+type Direction = 'vertical' | 'horizontal' | 'horizontal-rtl';
+
+type Scaling =
+  | 'none'
+  | 'shrink'
+  | 'fix_width'
+  | 'fix_height'
+  | 'shrink_width'
+  | 'shrink_height'
+  | `smart_${FitSizes}`;

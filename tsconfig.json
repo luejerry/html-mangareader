@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "module": "ES2020",
+    "module": "None",
     "target": "es2019",
     "jsx": "preserve",
     "strictFunctionTypes": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "outFile": "mangareader/build/scripts.js"
   },
+  "include": ["mangareader/src/scripts.ts"],
   "exclude": ["node_modules", "**/node_modules/*"]
 }

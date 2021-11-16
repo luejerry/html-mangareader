@@ -2,7 +2,7 @@ desktop.ini
 .idea/
 .vscode/
 build/
-dist/Mangareader/
+dist/
 __pycache__/
 Thumbs.db
 venv/

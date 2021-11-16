@@ -46,24 +46,36 @@ The app can be started in several different ways:
 ### Prerequisites
 
 - Python 3.5+
-- PyInstaller: `pip install pyinstaller` (only required for building)
-- Rarfile: `pip install rarfile` or `pip install -r requirements.txt`
-- py7zr: `pip install py7zr` or `pip install -r requirements.txt`
+- Node.js 16+
+- PyInstaller: `pip install pyinstaller` (only required for building binary)
 
-### Running without building (Windows/MacOS)
+### Setup
 
-The application can be started directly through Python without building. Examples:
+From the repository root:
+
+1. Install Python dependencies: `pip install -r requirements.txt`
+2. Install Node.js dependencies: `npm install`
+
+### Running without building binary (Windows/MacOS)
+
+The application can be started without building a binary. Examples:
 
 #### Start reader with open file prompt
 
 ```
-python reader.py
+npm run start
+
+# or, to autoreload on source file changes:
+npm run watch
 ```
 
 #### Directly open an image, folder, or archive
 
 ```
-python reader.py "path/to/open"
+npm run start "path/to/open"
+
+# or, to autoreload on source file changes:
+npm run watch "path/to/open"
 ```
 
 ### Building on Windows

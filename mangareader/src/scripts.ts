@@ -1,170 +1,8 @@
 /// <reference path="./types.ts" />
+/// <reference path="./utils.ts" />
+/// <reference path="./constants.ts" />
 
 (function () {
-  /**
-   * CONFIGURATION AND CONSTANTS
-   */
-  const versionCheckUrl = 'https://api.github.com/repos/luejerry/html-mangareader/contents/version';
-  const storageKey = 'mangareader-config';
-
-  const defaultConfig: LocalConfig = {
-    smoothScroll: true,
-    darkMode: false,
-    seamless: false,
-  };
-
-  const screenClamp = {
-    none: 'none',
-    shrink: 'shrink',
-    fit: 'fit',
-  } as const;
-
-  const orientation = {
-    portrait: 'portrait',
-    square: 'square',
-    landscape: 'landscape',
-  } as const;
-
-  const smartFit: { [K in FitSizes]: FitDimensions } = {
-    size0: {
-      portrait: {
-        width: 720,
-        height: 1024,
-      },
-      landscape: {
-        height: 800,
-      },
-    },
-    size1: {
-      portrait: {
-        width: 1080,
-        height: 1440,
-      },
-      landscape: {
-        height: 1080,
-      },
-    },
-  };
-
-  /**
-   * GENERIC UTILITY FUNCTIONS
-   */
-  function onIntersectChange(
-    targetIntersectHandler: (t: HTMLElement) => void,
-    intersectThreshold: number,
-  ): IntersectionObserver {
-    return new IntersectionObserver(
-      (entries) => {
-        entries
-          .filter((entry) => entry.intersectionRatio > intersectThreshold)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-          .map((entry) => entry.target as HTMLElement)
-          .forEach((target, index) => {
-            if (!index) {
-              targetIntersectHandler(target);
-            }
-          });
-      },
-      { threshold: [intersectThreshold], rootMargin: '-45% 0px -45% 0px' },
-    );
-  }
-
-  function asyncTimeout(millis: number): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(), millis);
-    });
-  }
-
-  /**
-   * Returns a throttled version of a given input function, which will be executed at most once
-   * every `millis` milliseconds. At the end of each period, the most recent invocation will be
-   * executed. Execution also happens immediately if invoked while no throttle window is in
-   * progress.
-   * @param {(...args: any[]) => void} func Function to be throttled
-   * @param {number} millis Throttle time in milliseconds
-   */
-  function throttle<T extends any[], R>(func: (...arg: T) => R, millis: number) {
-    let active: boolean;
-    let lastArgs: T;
-    let count: number;
-    return async (...args: T) => {
-      if (!active) {
-        active = true;
-        lastArgs = args;
-        func(...args);
-        count = 0;
-        while (true) {
-          await asyncTimeout(millis);
-          if (count) {
-            count = 0;
-            func(...lastArgs);
-          } else {
-            break;
-          }
-        }
-        // eslint-disable-next-line require-atomic-updates
-        active = false;
-      } else {
-        count++;
-        lastArgs = args;
-      }
-    };
-  }
-
-  /**
-   * Basic semver comparator. Only works with numbers, e.g. 1.2.1. Returns positive if target newer
-   * than source, negative if target older than source, or zero if equal.
-   * @param {string} source
-   * @param {string} target
-   */
-  function versionComparator(source: SemVer, target: SemVer): number {
-    const sourceParts = source.split('.').map((num) => parseInt(num, 10));
-    const targetParts = target.split('.').map((num) => parseInt(num, 10));
-
-    const recursor = (s: number[], t: number[]): number => {
-      if (!s.length && !t.length) {
-        return 0;
-      } else if (!s.length) {
-        return t[0] || 0;
-      } else if (!t.length) {
-        return -(s[0] || 0);
-      }
-
-      const diff = (t as [number])[0] - (s as [number])[0];
-      return diff === 0 ? recursor(s.slice(1), t.slice(1)) : diff;
-    };
-
-    return recursor(sourceParts, targetParts);
-  }
-
-  /**
-   * Creates a wrapper around `requestAnimationFrame` to enable a simpler task-based API for using
-   * it. The wrapper object defines an `addTask` function that can be invoked to schedule a task to
-   * run on the next animation frame. Description of `addTask` follows:
-   *
-   * Parameters
-   * - label {string} an identifier for the task. If more than one tasks with the same label are
-   *   scheduled in a single animation frame, only the most recently scheduled one will be executed.
-   * - task {function} Callback function to execute on the next animation frame. The task will only
-   *   run once, or not at all (if it is superceded by another task with the same label).
-   */
-  function createAnimationDispatcher() {
-    let tasks: Record<string, () => void> = {};
-    const loop = () => {
-      for (const [, task] of Object.entries(tasks)) {
-        task();
-      }
-      tasks = {};
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
-    return {
-      addTask: (label: string, task: () => void) => {
-        tasks[label] = task;
-      },
-    };
-  }
-
   /**
    * GLOBAL VARIABLES
    */
@@ -180,6 +18,9 @@
   const smartFitBtns = Array.from(
     document.getElementsByClassName('btn-smart-fit'),
   ) as HTMLButtonElement[];
+  const directionRadioBtns = Array.from(
+    document.getElementsByName('view-direction'),
+  ) as HTMLInputElement[];
   const smoothScrollCheckbox = document.getElementById('input-smooth-scroll') as HTMLInputElement;
   const darkModeCheckbox = document.getElementById('input-dark-mode') as HTMLInputElement;
   const seamlessCheckbox = document.getElementById('input-seamless') as HTMLInputElement;
@@ -198,21 +39,33 @@
   let scrubberPreviewHeight: number;
   let markerHeight: number;
   let visiblePageIndex: number;
+  let viewDirection: Direction;
 
-  const intersectObserver = onIntersectChange((target: HTMLElement) => {
-    visiblePage = target;
-    if (target.dataset.index == null) {
-      return;
+  function setupIntersectionObserver(threshold: number, rootMargin: string): IntersectionObserver {
+    const observer = onIntersectChange(
+      (target: HTMLElement) => {
+        visiblePage = target;
+        if (target.dataset.index == null) {
+          return;
+        }
+        visiblePageIndex = parseInt(target.dataset.index, 10);
+        // Update the URL hash as user scrolls.
+        const url = new URL(location.href);
+        url.hash = target.id;
+        history.replaceState(null, '', url.toString());
+
+        setScrubberMarkerActive(visiblePageIndex);
+      },
+      { threshold, rootMargin },
+    );
+    for (const page of pages) {
+      observer.observe(page);
     }
-    visiblePageIndex = parseInt(target.dataset.index, 10);
-    // Update the URL hash as user scrolls.
-    const url = new URL(location.href);
-    url.hash = target.id;
-    history.replaceState(null, '', url.toString());
+    return observer;
+  }
 
-    setScrubberMarkerActive(visiblePageIndex);
-  }, 0);
-  // TODO: threshold originally 0.2, experiment
+  // TODO: read this from config
+  let intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN.vertical);
 
   const imagesMeta = images.map((image) => {
     const ratio = image.naturalWidth / image.naturalHeight;
@@ -245,9 +98,20 @@
 
   function loadSettings(): void {
     const config = readConfig();
+    setupDirection(config);
     setupZenscroll(config);
     setupDarkMode(config);
     setupSeamless(config);
+  }
+
+  function setupDirection(config: LocalConfig): void {
+    // TODO: read this from config
+    const verticalButton = directionRadioBtns.find((button) => button.value === 'vertical');
+    if (!verticalButton) {
+      return;
+    }
+    verticalButton.checked = true;
+    viewDirection = 'vertical';
   }
 
   function setupZenscroll(config: LocalConfig): void {
@@ -263,8 +127,6 @@
     darkModeCheckbox.checked = config.darkMode;
     // Setting `checked` does not fire the `change` event, so we must dispatch it manually
     if (config.darkMode) {
-      // const change = document.createEvent('Event');
-      // change.initEvent('change', false, true);
       const change = new Event('change', { cancelable: true });
       darkModeCheckbox.dispatchEvent(change);
     }
@@ -273,8 +135,6 @@
   function setupSeamless(config: LocalConfig): void {
     seamlessCheckbox.checked = config.seamless;
     if (config.seamless) {
-      // const change = document.createEvent('Event');
-      // change.initEvent('change', false, true);
       const change = new Event('change', { cancelable: true });
       seamlessCheckbox.dispatchEvent(change);
     }
@@ -289,42 +149,42 @@
   }
 
   function handleOriginalSize(): void {
-    setImagesWidth(screenClamp.none, getWidth());
+    setImagesWidth(SCREENCLAMP.none, getWidth());
   }
 
   function handleShrinkSize(): void {
-    setImagesDimensions(screenClamp.shrink, getWidth(), getHeight());
+    setImagesDimensions(SCREENCLAMP.shrink, getWidth(), getHeight());
   }
 
   function handleFitWidth(): void {
-    setImagesWidth(screenClamp.fit, getWidth());
+    setImagesWidth(SCREENCLAMP.fit, getWidth());
   }
 
   function handleFitHeight(): void {
-    setImagesHeight(screenClamp.fit, getHeight());
+    setImagesHeight(SCREENCLAMP.fit, getHeight());
   }
 
   function handleShrinkWidth(): void {
-    setImagesWidth(screenClamp.shrink, getWidth());
+    setImagesWidth(SCREENCLAMP.shrink, getWidth());
   }
 
   function handleShrinkHeight(): void {
-    setImagesHeight(screenClamp.shrink, getHeight());
+    setImagesHeight(SCREENCLAMP.shrink, getHeight());
   }
 
   function handleSmartWidth(event: Event) {
     if (event.target instanceof HTMLElement) {
-      const key = event.target.dataset.fitKey as keyof typeof smartFit | undefined;
+      const key = event.target.dataset.fitKey as FitSizes | undefined;
       if (key) {
         smartFitImages(smartFit[key]);
       }
     }
   }
 
-  function setImagesWidth(fitMode: keyof typeof screenClamp, width: number) {
+  function setImagesWidth(fitMode: keyof typeof SCREENCLAMP, width: number) {
     for (const img of images) {
       switch (fitMode) {
-        case screenClamp.fit:
+        case SCREENCLAMP.fit:
           Object.assign(img.style, {
             width: `${width}px`,
             maxWidth: null,
@@ -332,7 +192,7 @@
             maxHeight: null,
           });
           break;
-        case screenClamp.shrink:
+        case SCREENCLAMP.shrink:
           Object.assign(img.style, {
             width: null,
             maxWidth: `${width}px`,
@@ -352,10 +212,10 @@
     visiblePage.scrollIntoView();
   }
 
-  function setImagesHeight(fitMode: keyof typeof screenClamp, height: number) {
+  function setImagesHeight(fitMode: keyof typeof SCREENCLAMP, height: number) {
     for (const img of images) {
       switch (fitMode) {
-        case screenClamp.fit:
+        case SCREENCLAMP.fit:
           Object.assign(img.style, {
             height: `${height}px`,
             maxWidth: null,
@@ -363,7 +223,7 @@
             maxHeight: null,
           });
           break;
-        case screenClamp.shrink:
+        case SCREENCLAMP.shrink:
           Object.assign(img.style, {
             width: null,
             maxHeight: `${height}px`,
@@ -380,16 +240,16 @@
           });
       }
     }
-    visiblePage.scrollIntoView();
+    visiblePage.scrollIntoView({ inline: 'center' });
   }
 
-  function setImagesDimensions(fitMode: keyof typeof screenClamp, width: number, height: number) {
+  function setImagesDimensions(fitMode: keyof typeof SCREENCLAMP, width: number, height: number) {
     for (const img of images) {
       switch (fitMode) {
-        case screenClamp.fit:
+        case SCREENCLAMP.fit:
           // Not implemented
           break;
-        case screenClamp.shrink:
+        case SCREENCLAMP.shrink:
           Object.assign(img.style, {
             width: null,
             maxHeight: `${height}px`,
@@ -412,7 +272,7 @@
   function smartFitImages(fitMode: FitDimensions): void {
     for (const { image: img, orientation: orient } of imagesMeta) {
       switch (orient) {
-        case orientation.portrait:
+        case ORIENTATION.portrait:
           Object.assign(img.style, {
             width: null,
             maxWidth: null,
@@ -420,7 +280,7 @@
             maxHeight: `${fitMode.portrait.height}px`,
           });
           break;
-        case orientation.landscape:
+        case ORIENTATION.landscape:
           Object.assign(img.style, {
             width: null,
             maxWidth: `${getWidth()}px`,
@@ -430,7 +290,30 @@
           break;
       }
     }
-    visiblePage.scrollIntoView({ behavior: 'smooth' });
+    visiblePage.scrollIntoView({ inline: 'center' });
+  }
+
+  function handleViewDirection(event: Event): void {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    const direction = event.target.value as Direction;
+    if (!direction) {
+      return;
+    }
+    viewDirection = direction;
+    // intersection observer must be recreated to change the root margin
+    intersectObserver.disconnect();
+    document.body.classList.remove('vertical', 'horizontal', 'horizontal-rtl');
+    document.body.classList.add(direction);
+    switch (direction) {
+      case 'horizontal':
+      case 'horizontal-rtl':
+        handleFitHeight();
+      case 'vertical':
+        visiblePage.scrollIntoView({ inline: 'center' });
+    }
+    intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN[direction]);
   }
 
   function handleSmoothScroll(event: Event): void {
@@ -471,7 +354,21 @@
     writeConfig({
       seamless: seamlessEnabled,
     });
-    visiblePage.scrollIntoView();
+    visiblePage.scrollIntoView({ inline: 'center' });
+  }
+
+  function handleHorizontalScroll(event: WheelEvent): void {
+    // TODO: skip if modifier keys are held (ctrl, shift)
+    switch (viewDirection) {
+      case 'horizontal':
+        event.preventDefault();
+        window.scrollBy({ left: event.deltaY });
+        return;
+      case 'horizontal-rtl':
+        event.preventDefault();
+        window.scrollBy({ left: -event.deltaY });
+        return;
+    }
   }
 
   function setupListeners(): void {
@@ -485,9 +382,15 @@
     for (const button of smartFitBtns) {
       button.addEventListener('click', handleSmartWidth);
     }
+    for (const button of directionRadioBtns) {
+      button.addEventListener('input', handleViewDirection);
+    }
+
     smoothScrollCheckbox.addEventListener('change', handleSmoothScroll);
     darkModeCheckbox.addEventListener('change', handleDarkMode);
     seamlessCheckbox.addEventListener('change', handleSeamless);
+
+    document.addEventListener('wheel', handleHorizontalScroll, { passive: false });
   }
 
   function setupScrubberPreview(): HTMLImageElement[] {
@@ -574,14 +477,8 @@
     scrubberDiv.addEventListener('click', (event) => {
       const cursorYRatio = event.clientY / screenHeight;
       const imageIndex = Math.floor(cursorYRatio * images.length);
-      images[imageIndex]?.scrollIntoView();
+      images[imageIndex]?.scrollIntoView({ inline: 'center' });
     });
-  }
-
-  function attachIntersectObservers(): void {
-    for (const page of pages) {
-      intersectObserver.observe(page);
-    }
   }
 
   async function checkVersion(): Promise<void> {
@@ -609,7 +506,6 @@
   function main(): void {
     setupListeners();
     loadSettings();
-    attachIntersectObservers();
     checkVersion();
     setupScrubber();
   }

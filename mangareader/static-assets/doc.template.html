@@ -15,14 +15,36 @@
       </div>
       <div class="menu-items">
         <div class="menu-subtitle">SIZING</div>
-        <button id="btn-original-width">Original size</button>
-        <button id="btn-shrink-size">Shrink to fit</button>
-        <button id="btn-shrink-width">Shrink width to fit</button>
-        <button id="btn-shrink-height">Shrink height to fit</button>
-        <button id="btn-fit-width">Fit to width</button>
-        <button id="btn-fit-height">Fit to height</button>
-        <button class="btn-smart-fit" data-fit-key="size0">Smart fit small</button>
-        <button class="btn-smart-fit" data-fit-key="size1">Smart fit large</button>
+        <button id="btn-original-width" class="btn-full">Original size</button>
+        <button id="btn-shrink-size" class="btn-full">Shrink to fit</button>
+        <button id="btn-shrink-width" class="btn-full">Shrink width to fit</button>
+        <button id="btn-shrink-height" class="btn-full">Shrink height to fit</button>
+        <button id="btn-fit-width" class="btn-full">Fit to width</button>
+        <button id="btn-fit-height" class="btn-full">Fit to height</button>
+        <button class="btn-smart-fit btn-full" data-fit-key="size0">Smart fit small</button>
+        <button class="btn-smart-fit btn-full" data-fit-key="size1">Smart fit large</button>
+        <div class="menu-subtitle">DIRECTION</div>
+        <div class="menu-horizontal-group">
+          <input
+            type="radio"
+            id="input-horizontal-rtl"
+            name="view-direction"
+            value="horizontal-rtl"
+          />
+          <label for="input-horizontal-rtl" class="label-radio">
+            <span class="view-direction-icon">&#x2b60;</span>
+          </label>
+
+          <input type="radio" id="input-vertical" name="view-direction" value="vertical" />
+          <label for="input-vertical" class="label-radio">
+            <span class="view-direction-icon">&#x2b63;</span>
+          </label>
+
+          <input type="radio" id="input-horizontal" name="view-direction" value="horizontal" />
+          <label for="input-horizontal" class="label-radio">
+            <span class="view-direction-icon">&#x2b62;</span>
+          </label>
+        </div>
         <div class="menu-subtitle">SETTINGS</div>
         <label class="label-toggle">
           <input type="checkbox" id="input-smooth-scroll" class="input-toggle" />
