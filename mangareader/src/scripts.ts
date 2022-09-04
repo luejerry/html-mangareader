@@ -461,6 +461,12 @@
       if (!image) {
         return;
       }
+      if (event.buttons & 1) {
+        // Allow left click drag scrubbing
+        if (imageIndex !== visiblePageIndex) {
+          images[imageIndex]?.scrollIntoView({ inline: 'center' });
+        }
+      }
       animationDispatcher.addTask('mousemove', () => {
         setMarkerPosition(cursorY);
         setMarkerText(`${imageIndex + 1}`);
