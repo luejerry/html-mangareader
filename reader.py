@@ -19,18 +19,19 @@ def parse_args() -> Namespace:
 def main() -> None:
     args = parse_args()
     if not args.path:
-        imagetypes = ';'.join(f'*.{ext}' for ext in templates.DEFAULT_IMAGETYPES)
-        archivetypes = ';'.join(
-            f'*.{ext}' for ext in (*templates.ZIP_TYPES, *templates.RAR_TYPES, *templates._7Z_TYPES)
-        )
+        imagetypes = [f'.{ext}' for ext in templates.DEFAULT_IMAGETYPES]
+        archivetypes = [
+            f'.{ext}' for ext in (*templates.ZIP_TYPES, *templates.RAR_TYPES, *templates._7Z_TYPES)
+        ]
         filetypes = (
-            ('Supported files', ';'.join((imagetypes, archivetypes))),
+            ('Supported files', [*imagetypes, *archivetypes]),
             ('Images', imagetypes),
             ('Comic book archive', archivetypes),
-            ('All files', '*'),
+            ('All files', ['*']),
         )
         target_path = filedialog.askopenfilename(
-            filetypes=filetypes, title='Open Image - Mangareader',
+            filetypes=filetypes,
+            title='Open Image - Mangareader',
         )
         if not target_path:
             return
