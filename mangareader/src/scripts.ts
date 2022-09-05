@@ -33,7 +33,7 @@
 
   const animationDispatcher = createAnimationDispatcher();
 
-  let visiblePage: HTMLElement;
+  let visiblePage: HTMLElement | null;
   // Used by scrubber
   const scrubberState: ScrubberState = {
     screenHeight: 0,
@@ -66,7 +66,6 @@
     return observer;
   }
 
-  // TODO: read this from config
   let intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN.vertical);
 
   const imagesMeta = images.map((image) => {
@@ -78,14 +77,15 @@
   });
 
   function readConfig(): LocalConfig {
-    let config;
+    let config: LocalConfig = {};
     try {
       // Unfortunately Edge does not allow localStorage access for file:// urls
-      config = localStorage.getItem(storageKey);
+      const serializedConfig: string | null = localStorage.getItem(storageKey);
+      config = JSON.parse(serializedConfig || '{}');
     } catch (err) {
       console.error(err);
     }
-    return config ? JSON.parse(config) : defaultConfig;
+    return config;
   }
 
   function writeConfig(config: Partial<LocalConfig>): void {
@@ -106,14 +106,22 @@
     setupSeamless(config);
   }
 
-  function setupDirection(config: LocalConfig): void {
-    // TODO: read this from config
-    const verticalButton = directionRadioBtns.find((button) => button.value === 'vertical');
-    if (!verticalButton) {
+  async function setupDirection(config: LocalConfig): Promise<void> {
+    const direction = config.direction || 'vertical';
+    const directionRadioBtn = directionRadioBtns.find((button) => button.value === direction);
+    if (!directionRadioBtn) {
       return;
     }
-    verticalButton.checked = true;
-    scrubberState.viewDirection = 'vertical';
+    directionRadioBtn.checked = true;
+    setDirection(direction);
+    // HACK: on initial page load, browser auto scrolls to the beginning of the page after some
+    // unspecified delay.
+    // For RTL layout, viewport must be scrolled to the end initially but must be delayed until
+    // after the browser scrolls. The timing is determined experimentally
+    if (direction === 'horizontal-rtl') {
+      await asyncTimeout(100);
+      pages[0]?.scrollIntoView({ inline: 'end' });
+    }
   }
 
   function setupZenscroll(config: LocalConfig): void {
@@ -126,7 +134,7 @@
   }
 
   function setupDarkMode(config: LocalConfig): void {
-    darkModeCheckbox.checked = config.darkMode;
+    darkModeCheckbox.checked = config.darkMode ?? false;
     // Setting `checked` does not fire the `change` event, so we must dispatch it manually
     if (config.darkMode) {
       const change = new Event('change', { cancelable: true });
@@ -135,7 +143,7 @@
   }
 
   function setupSeamless(config: LocalConfig): void {
-    seamlessCheckbox.checked = config.seamless;
+    seamlessCheckbox.checked = config.seamless ?? false;
     if (config.seamless) {
       const change = new Event('change', { cancelable: true });
       seamlessCheckbox.dispatchEvent(change);
@@ -211,7 +219,7 @@
           });
       }
     }
-    visiblePage.scrollIntoView();
+    visiblePage?.scrollIntoView();
   }
 
   function setImagesHeight(fitMode: keyof typeof SCREENCLAMP, height: number) {
@@ -242,7 +250,7 @@
           });
       }
     }
-    visiblePage.scrollIntoView({ inline: 'center' });
+    visiblePage?.scrollIntoView({ inline: 'center' });
   }
 
   function setImagesDimensions(fitMode: keyof typeof SCREENCLAMP, width: number, height: number) {
@@ -268,7 +276,7 @@
           });
       }
     }
-    visiblePage.scrollIntoView();
+    visiblePage?.scrollIntoView();
   }
 
   function smartFitImages(fitMode: FitDimensions): void {
@@ -292,17 +300,10 @@
           break;
       }
     }
-    visiblePage.scrollIntoView({ inline: 'center' });
+    visiblePage?.scrollIntoView({ inline: 'center' });
   }
 
-  function handleViewDirection(event: Event): void {
-    if (!(event.target instanceof HTMLInputElement)) {
-      return;
-    }
-    const direction = event.target.value as Direction;
-    if (!direction) {
-      return;
-    }
+  function setDirection(direction: Direction): void {
     scrubberState.viewDirection = direction;
     // intersection observer must be recreated to change the root margin
     intersectObserver.disconnect();
@@ -313,9 +314,23 @@
       case 'horizontal-rtl':
         handleFitHeight();
       case 'vertical':
-        visiblePage.scrollIntoView({ inline: 'center' });
+        visiblePage?.scrollIntoView({ inline: 'center' });
     }
     intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN[direction]);
+    writeConfig({
+      direction: direction,
+    });
+  }
+
+  function handleViewDirection(event: Event): void {
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    const direction = event.target.value as Direction;
+    if (!direction) {
+      return;
+    }
+    setDirection(direction);
   }
 
   function handleSmoothScroll(event: Event): void {
@@ -356,7 +371,7 @@
     writeConfig({
       seamless: seamlessEnabled,
     });
-    visiblePage.scrollIntoView({ inline: 'center' });
+    visiblePage?.scrollIntoView({ inline: 'center' });
   }
 
   function handleHorizontalScroll(event: WheelEvent): void {

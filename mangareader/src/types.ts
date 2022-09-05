@@ -6,9 +6,11 @@ interface Window {
 type SemVer = `${number}.${number}.${number}`;
 
 interface LocalConfig {
-  smoothScroll: boolean;
-  darkMode: boolean;
-  seamless: boolean;
+  smoothScroll?: boolean;
+  darkMode?: boolean;
+  seamless?: boolean;
+  scaling?: Scaling;
+  direction?: Direction;
 }
 
 type FitSizes = 'size0' | 'size1';
@@ -28,9 +30,9 @@ type Direction = 'vertical' | 'horizontal' | 'horizontal-rtl';
 
 type Scaling =
   | 'none'
+  | 'fit_width'
+  | 'fit_height'
   | 'shrink'
-  | 'fix_width'
-  | 'fix_height'
   | 'shrink_width'
   | 'shrink_height'
   | `smart_${FitSizes}`;
