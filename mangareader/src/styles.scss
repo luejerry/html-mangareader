@@ -185,7 +185,7 @@ input {
 
     /* Note: this is the exact height of the menu. Must be explicitly set in order to animate
     height transition */
-    height: 680px;
+    height: 520px;
 
     .menu-header {
       .menu-icon {
@@ -240,6 +240,13 @@ input {
     .menu-horizontal-group {
       display: flex;
       flex-direction: row;
+
+      .menu-horizontal-group-label {
+        font-size: 14px;
+        padding: 12px 12px 12px 24px;
+        width: 36px;
+        color: var(--menu-subtitle-color);
+      }
     }
 
     button {
@@ -254,8 +261,15 @@ input {
       }
 
       &.btn-full {
-        padding: 12px 24px 12px 60px;
+        padding: 12px 24px 12px 24px;
         text-align: left;
+      }
+
+      &.btn-grouped {
+        height: 41px;
+        flex-grow: 1;
+        font-size: 13px;
+        min-width: 52px;
       }
     }
   }

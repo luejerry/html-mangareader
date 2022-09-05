@@ -16,13 +16,22 @@
       <div class="menu-items">
         <div class="menu-subtitle">SIZING</div>
         <button id="btn-original-width" class="btn-full">Original size</button>
-        <button id="btn-shrink-size" class="btn-full">Shrink to fit</button>
-        <button id="btn-shrink-width" class="btn-full">Shrink width to fit</button>
-        <button id="btn-shrink-height" class="btn-full">Shrink height to fit</button>
-        <button id="btn-fit-width" class="btn-full">Fit to width</button>
-        <button id="btn-fit-height" class="btn-full">Fit to height</button>
-        <button class="btn-smart-fit btn-full" data-fit-key="size0">Smart fit small</button>
-        <button class="btn-smart-fit btn-full" data-fit-key="size1">Smart fit large</button>
+        <div class="menu-horizontal-group">
+          <div class="menu-horizontal-group-label">Shrink</div>
+          <button id="btn-shrink-width" class="btn-grouped">Width</button>
+          <button id="btn-shrink-height" class="btn-grouped">Height</button>
+          <button id="btn-shrink-size" class="btn-grouped">Both</button>
+        </div>
+        <div class="menu-horizontal-group">
+          <div class="menu-horizontal-group-label">Fit</div>
+          <button id="btn-fit-width" class="btn-grouped">Width</button>
+          <button id="btn-fit-height" class="btn-grouped">Height</button>
+        </div>
+        <div class="menu-horizontal-group">
+          <div class="menu-horizontal-group-label">Smart</div>
+          <button class="btn-smart-fit btn-grouped" data-fit-key="size0">Small</button>
+          <button class="btn-smart-fit btn-grouped" data-fit-key="size1">Large</button>
+        </div>
         <div class="menu-subtitle">DIRECTION</div>
         <div class="menu-horizontal-group">
           <input
