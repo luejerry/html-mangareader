@@ -1,3 +1,4 @@
+npm run compile && ^
 pyi-makespec --add-data="mangareader\build\styles.css;mangareader\build" ^
   --add-data="mangareader\build\scripts.js;mangareader\build" ^
   --add-data="mangareader\static-assets\menu.svg;mangareader\static-assets" ^

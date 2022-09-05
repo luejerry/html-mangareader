@@ -1,8 +1,8 @@
 {
   "type": "module",
   "scripts": {
-    "compile": "node build.js --no-browser",
-    "compile:watch": "node build.js --no-browser --watch",
+    "compile": "node build.js --build-only",
+    "compile:watch": "node build.js --build-only --watch",
     "start": "node build.js",
     "watch": "node build.js --watch"
   },

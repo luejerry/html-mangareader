@@ -23,9 +23,6 @@ This project was made out of frustration with the overall clunkiness I experienc
 ### Planned features
 
 - MacOS binary.
-- UI improvements to View Options.
-- Horizontal and LTR viewing mode.
-- Double page viewing mode.
 
 ## Install (Windows)
 
