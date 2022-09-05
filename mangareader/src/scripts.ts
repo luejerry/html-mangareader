@@ -35,11 +35,13 @@
 
   let visiblePage: HTMLElement;
   // Used by scrubber
-  let screenHeight: number;
-  let scrubberPreviewHeight: number;
-  let markerHeight: number;
-  let visiblePageIndex: number;
-  let viewDirection: Direction;
+  const scrubberState: ScrubberState = {
+    screenHeight: 0,
+    previewHeight: 0,
+    markerHeight: 0,
+    visiblePageIndex: 0,
+    viewDirection: 'vertical',
+  };
 
   function setupIntersectionObserver(threshold: number, rootMargin: string): IntersectionObserver {
     const observer = onIntersectChange(
@@ -48,13 +50,13 @@
         if (target.dataset.index == null) {
           return;
         }
-        visiblePageIndex = parseInt(target.dataset.index, 10);
+        scrubberState.visiblePageIndex = parseInt(target.dataset.index, 10);
         // Update the URL hash as user scrolls.
         const url = new URL(location.href);
         url.hash = target.id;
         history.replaceState(null, '', url.toString());
 
-        setScrubberMarkerActive(visiblePageIndex);
+        setScrubberMarkerActive(scrubberState.visiblePageIndex);
       },
       { threshold, rootMargin },
     );
@@ -111,7 +113,7 @@
       return;
     }
     verticalButton.checked = true;
-    viewDirection = 'vertical';
+    scrubberState.viewDirection = 'vertical';
   }
 
   function setupZenscroll(config: LocalConfig): void {
@@ -301,7 +303,7 @@
     if (!direction) {
       return;
     }
-    viewDirection = direction;
+    scrubberState.viewDirection = direction;
     // intersection observer must be recreated to change the root margin
     intersectObserver.disconnect();
     document.body.classList.remove('vertical', 'horizontal', 'horizontal-rtl');
@@ -358,8 +360,10 @@
   }
 
   function handleHorizontalScroll(event: WheelEvent): void {
-    // TODO: skip if modifier keys are held (ctrl, shift)
-    switch (viewDirection) {
+    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+    switch (scrubberState.viewDirection) {
       case 'horizontal':
         event.preventDefault();
         window.scrollBy({ left: event.deltaY });
@@ -405,11 +409,19 @@
   }
 
   function computeMarkerY(cursorY: number): number {
-    return Math.max(0, Math.min(cursorY - markerHeight / 2, screenHeight - markerHeight));
+    return Math.max(
+      0,
+      Math.min(
+        cursorY - scrubberState.markerHeight / 2,
+        scrubberState.screenHeight - scrubberState.markerHeight,
+      ),
+    );
   }
 
   function setScrubberMarkerActive(activeIndex: number): void {
-    const activeY = ((activeIndex + 0.5) / images.length) * screenHeight - markerHeight / 2;
+    const activeY =
+      ((activeIndex + 0.5) / images.length) * scrubberState.screenHeight -
+      scrubberState.markerHeight / 2;
     scrubberMarkerActive.style.transform = `translateY(${activeY}px)`;
     scrubberMarkerActive.innerText = `${activeIndex + 1}`;
   }
@@ -418,9 +430,9 @@
     let prevImage: HTMLImageElement;
 
     const setPreviewScroll = (cursorY: number) => {
-      const cursorYRatio = cursorY / screenHeight;
+      const cursorYRatio = cursorY / scrubberState.screenHeight;
       scrubberPreviewDiv.style.transform = `translateY(${
-        -cursorYRatio * scrubberPreviewHeight + cursorY
+        -cursorYRatio * scrubberState.previewHeight + cursorY
       }px)`;
     };
 
@@ -439,13 +451,13 @@
         scrubberImages = setupScrubberPreview();
         scrubberActivated = true;
       }
-      screenHeight = document.documentElement.clientHeight;
+      scrubberState.screenHeight = document.documentElement.clientHeight;
       // We can't style this as 100vh because it doesn't account for horizontal scrollbar
-      scrubberPreviewHeight = scrubberPreviewDiv.offsetHeight;
-      markerHeight = scrubberMarker.offsetHeight;
+      scrubberState.previewHeight = scrubberPreviewDiv.offsetHeight;
+      scrubberState.markerHeight = scrubberMarker.offsetHeight;
 
-      setScrubberMarkerActive(visiblePageIndex);
-      scrubberDiv.style.height = `${screenHeight}px`;
+      setScrubberMarkerActive(scrubberState.visiblePageIndex);
+      scrubberDiv.style.height = `${scrubberState.screenHeight}px`;
       scrubberContainerDiv.style.opacity = '1';
     });
 
@@ -455,7 +467,7 @@
 
     scrubberDiv.addEventListener('mousemove', (event) => {
       const cursorY = event.clientY;
-      const cursorYRatio = cursorY / screenHeight;
+      const cursorYRatio = cursorY / scrubberState.screenHeight;
       const imageIndex = Math.floor(cursorYRatio * images.length);
       const image = scrubberImages[imageIndex];
       if (!image) {
@@ -463,7 +475,7 @@
       }
       if (event.buttons & 1) {
         // Allow left click drag scrubbing
-        if (imageIndex !== visiblePageIndex) {
+        if (imageIndex !== scrubberState.visiblePageIndex) {
           images[imageIndex]?.scrollIntoView({ inline: 'center' });
         }
       }
@@ -481,7 +493,7 @@
       });
     });
     scrubberDiv.addEventListener('click', (event) => {
-      const cursorYRatio = event.clientY / screenHeight;
+      const cursorYRatio = event.clientY / scrubberState.screenHeight;
       const imageIndex = Math.floor(cursorYRatio * images.length);
       images[imageIndex]?.scrollIntoView({ inline: 'center' });
     });

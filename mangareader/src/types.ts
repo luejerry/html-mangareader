@@ -34,3 +34,11 @@ type Scaling =
   | 'shrink_width'
   | 'shrink_height'
   | `smart_${FitSizes}`;
+
+interface ScrubberState {
+  screenHeight: number;
+  previewHeight: number;
+  markerHeight: number;
+  visiblePageIndex: number;
+  viewDirection: Direction;
+}
