@@ -100,10 +100,33 @@
 
   function loadSettings(): void {
     const config = readConfig();
+    initScalingMode(config);
     setupDirection(config);
     setupZenscroll(config);
     setupDarkMode(config);
     setupSeamless(config);
+  }
+
+  function initScalingMode(config: LocalConfig): void {
+    const scaling = config.scaling || 'none';
+    switch (scaling) {
+      case 'none':
+        return handleOriginalSize();
+      case 'fit_width':
+        return handleFitWidth();
+      case 'fit_height':
+        return handleFitHeight();
+      case 'shrink':
+        return handleShrinkSize();
+      case 'shrink_width':
+        return handleShrinkWidth();
+      case 'shrink_height':
+        return handleShrinkHeight();
+      case 'smart_size0':
+        return smartFitImages(smartFit.size0);
+      case 'smart_size1':
+        return smartFitImages(smartFit.size1);
+    }
   }
 
   async function setupDirection(config: LocalConfig): Promise<void> {
@@ -160,26 +183,32 @@
 
   function handleOriginalSize(): void {
     setImagesWidth(SCREENCLAMP.none, getWidth());
+    writeConfig({ scaling: 'none' });
   }
 
   function handleShrinkSize(): void {
     setImagesDimensions(SCREENCLAMP.shrink, getWidth(), getHeight());
+    writeConfig({ scaling: 'shrink' });
   }
 
   function handleFitWidth(): void {
     setImagesWidth(SCREENCLAMP.fit, getWidth());
+    writeConfig({ scaling: 'fit_width' });
   }
 
   function handleFitHeight(): void {
     setImagesHeight(SCREENCLAMP.fit, getHeight());
+    writeConfig({ scaling: 'fit_height' });
   }
 
   function handleShrinkWidth(): void {
     setImagesWidth(SCREENCLAMP.shrink, getWidth());
+    writeConfig({ scaling: 'shrink_width' });
   }
 
   function handleShrinkHeight(): void {
     setImagesHeight(SCREENCLAMP.shrink, getHeight());
+    writeConfig({ scaling: 'shrink_height' });
   }
 
   function handleSmartWidth(event: Event) {
@@ -187,6 +216,7 @@
       const key = event.target.dataset.fitKey as FitSizes | undefined;
       if (key) {
         smartFitImages(smartFit[key]);
+        writeConfig({ scaling: `smart_${key}` });
       }
     }
   }
