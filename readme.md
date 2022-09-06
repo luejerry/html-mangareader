@@ -13,6 +13,8 @@ This project was made out of frustration with the overall clunkiness I experienc
 ## Features
 
 - View your images in a continuously scrollable page.
+- Various automatic resizing options.
+- Horizontal view options (LTR and RTL)
 - Use all the familiar navigation controls available on your browser/device setup.
 - Open images directly from a folder or contained in a comic book archive file.
   - Supported archive formats: cbz, cbr, cb7, zip, rar, 7z
