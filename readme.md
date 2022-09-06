@@ -23,7 +23,7 @@ This project was made out of frustration with the overall clunkiness I experienc
 
 - Windows
 - MacOS 12 (beta support)
- - **Note**: does not support RAR/CBR archives
+  - **Note**: does not support RAR/CBR archives
 
 ## Install
 
