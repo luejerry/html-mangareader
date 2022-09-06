@@ -4,7 +4,7 @@
 
 **[Try the demo in your browser.](https://luejerry.github.io/html-mangareader-demo)**
 
-Mangareader is a simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ/RAR/CBR archive as a single, continuously scrollable page in your default browser.
+Mangareader is a simple image viewer designed for reading digital comic books. It displays images in a folder or ZIP/CBZ/RAR/CBR/7Z/CB7 archive as a single, continuously scrollable page in your default browser.
 
 This project was made out of frustration with the overall clunkiness I experienced with other comic book readers I tried on the Windows platform. If you need features like bookmarks, history, library management, cloud sync, etc. this is not the comic reader for you. This app is focused only on providing a simple and fluid viewing experience.
 
@@ -19,21 +19,23 @@ This project was made out of frustration with the overall clunkiness I experienc
   - Supported image formats: bmp, png, jpg, gif, apng, svg, webp
 - Light and dark themes.
 
-### Planned features
+### Supported platforms
 
-- MacOS binary.
+- Windows
+- MacOS 12 (beta support)
+ - **Note**: does not support RAR/CBR archives
 
-## Install (Windows)
+## Install
 
-Windows binaries are located under [Releases](https://github.com/luejerry/html-mangareader/releases).
+Application builds are located under [Releases](https://github.com/luejerry/html-mangareader/releases).
 
 Download and extract your desired version, and the application is ready to use. No installation is required.
 
-## Usage (Windows)
+## Usage
 
 The app can be started in several different ways:
 
-- Run `mangareader.exe` and open an image file or ZIP/CBZ/RAR/CBR.
+- Run `mangareader.exe` (Windows) or `HTML Mangareader.app` (MacOS) and open an image file or comic book archive.
 - Right click an image file or archive, and "Open with..." the Mangareader executable.
 - Drag an image file, image folder, or archive onto Mangareader executable or a shortcut.
 
@@ -41,13 +43,15 @@ The app can be started in several different ways:
 
 ### Prerequisites
 
-- Python 3.5+
+- Python 3.7+
 - Node.js 16+
 - PyInstaller: `pip install pyinstaller` (only required for building binary)
 
 ### Setup
 
-From the repository root:
+First, ensure the prerequisites above are installed on the system.
+
+Then, from the repository root:
 
 1. Install Python dependencies: `pip install -r requirements.txt`
 2. Install Node.js dependencies: `npm install`
@@ -74,10 +78,25 @@ npm run start "path/to/open"
 npm run watch "path/to/open"
 ```
 
-### Building on Windows
+### Build distributable
 
 Building the executable is done using [PyInstaller](https://www.pyinstaller.org/).
+
+#### Windows
 
 Run `build-win.cmd`. The executable will be created in `dist\mangareader`.
 
 PyInstaller options can be configured in the script. See the [documentation](https://pyinstaller.readthedocs.io/en/stable/usage.html) for details.
+
+#### MacOS
+
+From the repository root, run:
+
+```
+npm run compile
+pyinstaller --noconfirm mangareader-darwin-x86.spec
+```
+
+The application bundle will be created at `dist/HTML Mangareader.app`.
+
+**Warning**: building with Python 3.10 has a bug which will prevent the app from being able to open files via the native launch service (i.e. drag-drop file or Open With). Tested working on Python 3.7.5.
