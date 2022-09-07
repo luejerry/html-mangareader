@@ -100,5 +100,3 @@ pyinstaller --noconfirm mangareader-darwin-x86.spec
 ```
 
 The application bundle will be created at `dist/HTML Mangareader.app`.
-
-**Warning**: building with Python 3.10 has a bug which will prevent the app from being able to open files via the native launch service (i.e. drag-drop file or Open With). Tested working on Python 3.7.5.
