@@ -1,15 +1,19 @@
 import os
 import re
 import tempfile
+import json
+import base64
 import zipfile
 import rarfile
 import py7zr
+from configparser import ConfigParser
 from pathlib import Path
 from string import Template
 from typing import List, Any, Union, Iterable
 from mangareader.excepts import ImagesNotFound
 from mangareader.templates import RAR_TYPES, ZIP_TYPES, _7Z_TYPES
 from mangareader.sevenzipadapter import SevenZipAdapter
+from mangareader.config import CONFIG_KEY
 from shutil import copy
 
 
@@ -19,6 +23,7 @@ def render_from_template(
     title: str,
     doc_template: str,
     page_template: str,
+    config: ConfigParser,
     outfile: str = os.path.join(tempfile.gettempdir(), 'html-mangareader', 'render.html'),
 ) -> str:
     """Render a list of image paths to the finished HTML document.
@@ -38,6 +43,14 @@ def render_from_template(
     if not paths:
         raise ImagesNotFound('No images were sent to the renderer.')
     imagepaths = [Path(p).as_uri() for p in paths]
+    try:
+        write_config = json.dumps(
+            {
+                'disableNavButtons': config[CONFIG_KEY].getboolean('disableNavButtons'),
+            }
+        )
+    except:
+        write_config = '{}'
     os.makedirs(os.path.dirname(outfile), exist_ok=True)
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
         html_template = Template(doc_template)
@@ -51,7 +64,12 @@ def render_from_template(
             )
             for i in range(0, len(imagepaths))
         ]
-        doc_string = html_template.substitute(pages=''.join(img_list), version=version, title=title)
+        doc_string = html_template.substitute(
+            pages=''.join(img_list),
+            version=version,
+            title=title,
+            config=base64.b64encode(write_config.encode('utf-8')).decode('utf-8'),
+        )
         renderfd.write(doc_string)
     # print("view saved to " + outfile)
     return outfile
@@ -172,6 +190,7 @@ def extract_render(
     boot_template_path: str,
     asset_paths: Iterable[str],
     img_types: Iterable[str],
+    config: ConfigParser,
     outpath: Path = Path(tempfile.gettempdir()) / 'html-mangareader',
 ) -> Path:
     """Main controller procedure. Handles opening of archive, image, or directory and renders the images
@@ -234,6 +253,7 @@ def extract_render(
             doc_template=doc_template,
             page_template=page_template,
             outfile=str(outpath / 'index.html'),
+            config=config,
         )
         bootfile = render_bootstrap(
             outfile=str(outpath / 'boot.html'),

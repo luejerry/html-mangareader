@@ -3,6 +3,13 @@ interface Window {
   pauseZenscroll: boolean;
 }
 
+/**
+ * User configuration loaded from the config.ini file
+ */
+interface ConfigIni {
+  disableNavButtons?: boolean;
+}
+
 type SemVer = `${number}.${number}.${number}`;
 
 interface LocalConfig {

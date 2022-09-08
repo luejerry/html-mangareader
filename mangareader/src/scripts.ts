@@ -43,6 +43,15 @@
     viewDirection: 'vertical',
   };
 
+  function load_config_ini(): ConfigIni {
+    try {
+      return JSON.parse(atob(document.body.dataset.config || '')) as ConfigIni;
+    } catch (e) {
+      console.error('Failed to parse config.ini', e);
+      return {};
+    }
+  }
+
   function setupIntersectionObserver(threshold: number, rootMargin: string): IntersectionObserver {
     const observer = onIntersectChange(
       (target: HTMLElement) => {
@@ -99,12 +108,20 @@
   }
 
   function loadSettings(): void {
+    const configIni = load_config_ini();
     const config = readConfig();
+    initShowNavPref(configIni);
     initScalingMode(config);
     setupDirection(config);
     setupZenscroll(config);
     setupDarkMode(config);
     setupSeamless(config);
+  }
+
+  function initShowNavPref(config: ConfigIni): void {
+    if (config.disableNavButtons) {
+      document.body.classList.add('disable-nav');
+    }
   }
 
   function initScalingMode(config: LocalConfig): void {
@@ -405,7 +422,7 @@
   }
 
   function handleHorizontalScroll(event: WheelEvent): void {
-    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey || !event.deltaY) {
       return;
     }
     switch (scrubberState.viewDirection) {
