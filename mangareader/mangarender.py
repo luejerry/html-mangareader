@@ -11,7 +11,7 @@ from pathlib import Path
 from string import Template
 from typing import List, Any, Union, Iterable
 from mangareader.excepts import ImagesNotFound
-from mangareader.templates import RAR_TYPES, ZIP_TYPES, _7Z_TYPES
+from mangareader.templates import IMG_PLACEHOLDER, RAR_TYPES, ZIP_TYPES, _7Z_TYPES
 from mangareader.sevenzipadapter import SevenZipAdapter
 from mangareader.config import CONFIG_KEY
 import mangareader.imagesize as imagesize
@@ -47,6 +47,7 @@ def render_from_template(
         write_config = json.dumps(
             {
                 'disableNavButtons': config[CONFIG_KEY].getboolean('disableNavButtons'),
+                'dynamicImageLoading': config[CONFIG_KEY].getboolean('dynamicImageLoading'),
             }
         )
     except:
@@ -58,7 +59,12 @@ def render_from_template(
         img_dimensions = [imagesize.get(path) for path in paths]
         img_list = [
             img_template.substitute(
-                img=Path(path).as_uri(),
+                img=Path(path).as_uri()
+                if not config[CONFIG_KEY].getboolean('dynamicImageLoading')
+                else IMG_PLACEHOLDER,
+                lazyimg=Path(path).as_uri()
+                if config[CONFIG_KEY].getboolean('dynamicImageLoading')
+                else '',
                 width=img_dimensions[i][0],
                 height=img_dimensions[i][1],
                 id=str(i),

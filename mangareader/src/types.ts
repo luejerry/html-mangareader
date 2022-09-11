@@ -8,6 +8,7 @@ interface Window {
  */
 interface ConfigIni {
   disableNavButtons?: boolean;
+  dynamicImageLoading?: boolean;
 }
 
 type SemVer = `${number}.${number}.${number}`;

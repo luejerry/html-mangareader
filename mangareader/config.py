@@ -34,6 +34,9 @@ def get_or_create_config() -> ConfigParser:
     if not 'disableNavButtons' in config[CONFIG_KEY]:
         config[CONFIG_KEY]['disableNavButtons'] = 'no'
         dirty = True
+    if not 'dynamicImageLoading' in config[CONFIG_KEY]:
+        config[CONFIG_KEY]['dynamicImageLoading'] = 'no'
+        dirty = True
     if dirty:
         with open(config_path, 'w') as config_file:
             config.write(config_file)

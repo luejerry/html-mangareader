@@ -18,3 +18,4 @@ HTML_TEMPLATES = {
     'page': 'static-assets/img.template.html',
     'boot': 'static-assets/boot.template.html',
 }
+IMG_PLACEHOLDER = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8HwYAAloBV80ot9EAAAAASUVORK5CYII='

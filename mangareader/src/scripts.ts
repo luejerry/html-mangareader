@@ -33,8 +33,9 @@
 
   const animationDispatcher = createAnimationDispatcher();
 
-  let intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN.vertical);
+  let intersectObserver: IntersectionObserver;
   let visiblePage: HTMLElement | null;
+  let configIni: ConfigIni = {};
   // Used by scrubber
   const scrubberState: ScrubberState = {
     screenHeight: 0,
@@ -77,8 +78,9 @@
         // Update the scrubber marker as user scrolls.
         scrubberState.visiblePageIndex = parseInt(target.dataset.index, 10);
         setScrubberMarkerActive(scrubberState.visiblePageIndex);
-
-        throttledUpdateLoadedImages(images, scrubberState.visiblePageIndex, 'pageloader');
+        if (configIni.dynamicImageLoading) {
+          throttledUpdateLoadedImages(images, scrubberState.visiblePageIndex, 'pageloader');
+        }
       },
       { threshold, rootMargin },
     );
@@ -160,11 +162,14 @@
   /**
    * Do initial setup of the page based on configuration settings.
    */
-  function loadSettings(): void {
-    const configIni = load_config_ini();
+  async function loadSettings(): Promise<void> {
+    configIni = load_config_ini();
     const config = readConfig();
     initShowNavPref(configIni);
     initScalingMode(config);
+    // Need to wait for page to render, otherwise intersection observer fires before viewport
+    // moves to the initial URL hash for the opened image
+    await asyncTimeout(0);
     setupDirection(config);
     setupZenscroll(config);
     setupDarkMode(config);
@@ -450,7 +455,7 @@
   function setDirection(direction: Direction): void {
     scrubberState.viewDirection = direction;
     // intersection observer must be recreated to change the root margin
-    intersectObserver.disconnect();
+    intersectObserver?.disconnect();
     document.body.classList.remove('vertical', 'horizontal', 'horizontal-rtl');
     document.body.classList.add(direction);
     switch (direction) {
@@ -562,8 +567,12 @@
       previewImage.loading = 'lazy';
       previewImage.classList.add('scrubber-preview-image');
       previewImage.dataset.index = `${i}`;
-      previewImage.src = loadingPlaceholder;
-      previewImage.dataset.src = img.dataset.src;
+      if (configIni.dynamicImageLoading) {
+        previewImage.src = loadingPlaceholder;
+        previewImage.dataset.src = img.dataset.src;
+      } else {
+        previewImage.src = img.src;
+      }
       previewImage.style.width = `${heightToRatioWidth(img, 180)}px`;
       return previewImage;
     });
@@ -628,15 +637,19 @@
 
     scrubberDiv.addEventListener('mouseleave', () => {
       scrubberContainerDiv.style.opacity = '0';
-      // set page number to -100 to effectively unload all images
-      updateLoadedImages(scrubberImages, -100, 'scrubber');
+      if (configIni.dynamicImageLoading) {
+        // set page number to -100 to effectively unload all images
+        updateLoadedImages(scrubberImages, -100, 'scrubber');
+      }
     });
 
     scrubberDiv.addEventListener('mousemove', (event) => {
       const cursorY = event.clientY;
       const cursorYRatio = cursorY / scrubberState.screenHeight;
       scrubberState.previewPageIndex = Math.floor(cursorYRatio * images.length);
-      debouncedUpdateLoadedImages(scrubberImages, scrubberState.previewPageIndex, 'scrubber');
+      if (configIni.dynamicImageLoading) {
+        debouncedUpdateLoadedImages(scrubberImages, scrubberState.previewPageIndex, 'scrubber');
+      }
       const image = scrubberImages[scrubberState.previewPageIndex];
       if (!image) {
         return;
@@ -689,7 +702,7 @@
     }
   }
 
-  function main(): void {
+  async function main(): Promise<void> {
     setupListeners();
     loadSettings();
     checkVersion();
