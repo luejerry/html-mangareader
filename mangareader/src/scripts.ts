@@ -24,6 +24,7 @@
   const smoothScrollCheckbox = document.getElementById('input-smooth-scroll') as HTMLInputElement;
   const darkModeCheckbox = document.getElementById('input-dark-mode') as HTMLInputElement;
   const seamlessCheckbox = document.getElementById('input-seamless') as HTMLInputElement;
+  const scrubberIconDiv = document.getElementById('scrubber-icon') as HTMLDivElement;
   const scrubberContainerDiv = document.getElementById('scrubber-container') as HTMLDivElement;
   const scrubberDiv = document.getElementById('scrubber') as HTMLDivElement;
   const scrubberPreviewDiv = document.getElementById('scrubber-preview') as HTMLDivElement;
@@ -174,6 +175,7 @@
     setupZenscroll(config);
     setupDarkMode(config);
     setupSeamless(config);
+    setupScrubber(configIni);
   }
 
   /**
@@ -598,7 +600,12 @@
     scrubberMarkerActive.innerText = `${activeIndex + 1}`;
   }
 
-  function setupScrubber(): void {
+  function setupScrubber(configIni: ConfigIni): void {
+    if (configIni.disableNavBar) {
+      scrubberIconDiv.style.display = 'none';
+      scrubberContainerDiv.style.display = 'none';
+      return;
+    }
     let prevImage: HTMLImageElement;
 
     const setPreviewScroll = (cursorY: number) => {
@@ -706,7 +713,6 @@
     setupListeners();
     loadSettings();
     checkVersion();
-    setupScrubber();
   }
 
   main();

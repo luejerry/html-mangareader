@@ -54,6 +54,7 @@ In addition to the in-app options, some advanced options can be configured in th
   - Example: `browser = C:\Program Files\Google\Chrome\Application\chrome.exe`
 - **disableNavButtons** (default: no): hide the next/previous page controls in the app.
   - Example: `disableNavButtons = yes`
+- **disableNavBar** (default: no): hide the right side quick navigation control in the app.
 - **dynamicImageLoading** (default: no): reduce memory usage of the app by aggressively unloading images that are not currently visible, at the cost of scrolling performance and heavier disk usage.
   - Example: `dynamicImageLoading = yes`
 

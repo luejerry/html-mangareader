@@ -8,6 +8,7 @@ interface Window {
  */
 interface ConfigIni {
   disableNavButtons?: boolean;
+  disableNavBar?: boolean;
   dynamicImageLoading?: boolean;
 }
 

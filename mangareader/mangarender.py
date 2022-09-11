@@ -47,6 +47,7 @@ def render_from_template(
         write_config = json.dumps(
             {
                 'disableNavButtons': config[CONFIG_KEY].getboolean('disableNavButtons'),
+                'disableNavBar': config[CONFIG_KEY].getboolean('disableNavBar'),
                 'dynamicImageLoading': config[CONFIG_KEY].getboolean('dynamicImageLoading'),
             }
         )
