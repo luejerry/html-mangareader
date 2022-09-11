@@ -41,6 +41,22 @@ The app can be started in several different ways:
 - Right click an image file or archive, and "Open with..." the Mangareader executable.
 - Drag an image file, image folder, or archive onto Mangareader executable or a shortcut.
 
+## Advanced options
+
+In addition to the in-app options, some advanced options can be configured in the app's `config.ini` file:
+
+- Windows: `C:\Users\<username>\AppData\Local\html-mangareader\config.ini`
+- MacOS: `/Users/<username>/Library/Application Support/html-mangareader/config.ini`
+
+### config.ini options
+
+- **browser** (default: none): specify the full path to a browser for the app to use. If blank, the default browser will be used.
+  - Example: `browser = C:\Program Files\Google\Chrome\Application\chrome.exe`
+- **disableNavButtons** (default: no): hide the next/previous page controls in the app.
+  - Example: `disableNavButtons = yes`
+- **dynamicImageLoading** (default: no): reduce memory usage of the app by aggressively unloading images that are not currently visible, at the cost of scrolling performance and heavier disk usage.
+  - Example: `dynamicImageLoading = yes`
+
 ## For developers
 
 ### Prerequisites
