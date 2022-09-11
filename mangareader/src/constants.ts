@@ -5,7 +5,7 @@
  */
 const versionCheckUrl = 'https://api.github.com/repos/luejerry/html-mangareader/contents/version';
 const storageKey = 'mangareader-config';
-const maxLoadedImages = 20;
+const maxLoadedImages = 50;
 const loadingPlaceholder =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8HwYAAloBV80ot9EAAAAASUVORK5CYII=';
 
