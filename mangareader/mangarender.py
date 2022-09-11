@@ -14,8 +14,8 @@ from mangareader.excepts import ImagesNotFound
 from mangareader.templates import RAR_TYPES, ZIP_TYPES, _7Z_TYPES
 from mangareader.sevenzipadapter import SevenZipAdapter
 from mangareader.config import CONFIG_KEY
+import mangareader.imagesize as imagesize
 from shutil import copy
-import imagesize
 
 
 def render_from_template(

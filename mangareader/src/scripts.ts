@@ -33,6 +33,7 @@
 
   const animationDispatcher = createAnimationDispatcher();
 
+  let intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN.vertical);
   let visiblePage: HTMLElement | null;
   // Used by scrubber
   const scrubberState: ScrubberState = {
@@ -43,6 +44,10 @@
     viewDirection: 'vertical',
   };
 
+  /**
+   * Read local `config.ini` file which is encoded in base64 in the `body[data-config]` attribute.
+   * @returns Parsed config object, or empty object if valid config not found.
+   */
   function load_config_ini(): ConfigIni {
     try {
       return JSON.parse(atob(document.body.dataset.config || '')) as ConfigIni;
@@ -52,6 +57,9 @@
     }
   }
 
+  /**
+   * Setup tasks to be run when the user scrolls to a new page.
+   */
   function setupIntersectionObserver(threshold: number, rootMargin: string): IntersectionObserver {
     const observer = onIntersectChange(
       (target: HTMLElement) => {
@@ -59,12 +67,13 @@
         if (target.dataset.index == null) {
           return;
         }
-        scrubberState.visiblePageIndex = parseInt(target.dataset.index, 10);
         // Update the URL hash as user scrolls.
         const url = new URL(location.href);
         url.hash = target.id;
         history.replaceState(null, '', url.toString());
 
+        // Update the scrubber marker as user scrolls.
+        scrubberState.visiblePageIndex = parseInt(target.dataset.index, 10);
         setScrubberMarkerActive(scrubberState.visiblePageIndex);
       },
       { threshold, rootMargin },
@@ -75,8 +84,6 @@
     return observer;
   }
 
-  let intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN.vertical);
-
   const imagesMeta = images.map((image) => {
     const ratio = image.width / image.height;
     return {
@@ -85,6 +92,16 @@
     };
   });
 
+  /**
+   * Read the configuration stored in browser LocalStorage. Unlike `config.ini` these settings can
+   * be changed directly from the UI.
+   *
+   * Note that some browser security policies may forbid LocalStorage access, in which case this
+   * function will return an empty object.
+   *
+   * @returns Parsed configuration file, or empty object if valid config not found or cannot be
+   * accessed.
+   */
   function readConfig(): LocalConfig {
     let config: LocalConfig = {};
     try {
@@ -97,6 +114,11 @@
     return config;
   }
 
+  /**
+   * Update configuration to browser LocalStorage. Note that some browser security policies may
+   * forbid LocalStorage access, in which case this function will do nothing.
+   * @param config Configuration key-value pairs to update. Update is merged with existing config.
+   */
   function writeConfig(config: Partial<LocalConfig>): void {
     const oldConfig = readConfig();
     const newConfig = { ...oldConfig, ...config };
@@ -107,6 +129,9 @@
     }
   }
 
+  /**
+   * Do initial setup of the page based on configuration settings.
+   */
   function loadSettings(): void {
     const configIni = load_config_ini();
     const config = readConfig();
@@ -118,12 +143,18 @@
     setupSeamless(config);
   }
 
+  /**
+   * Hide the navigation buttons if `disable-nav = yes` in `config.ini`.
+   */
   function initShowNavPref(config: ConfigIni): void {
     if (config.disableNavButtons) {
       document.body.classList.add('disable-nav');
     }
   }
 
+  /**
+   * Apply the user's last selected image scaling preference. Defaults to original size.
+   */
   function initScalingMode(config: LocalConfig): void {
     const scaling = config.scaling || 'none';
     switch (scaling) {
@@ -146,6 +177,9 @@
     }
   }
 
+  /**
+   * Apply the user's last selected layout direction preference. Defaults to vertical direction.
+   */
   async function setupDirection(config: LocalConfig): Promise<void> {
     const direction = config.direction || 'vertical';
     const directionRadioBtn = directionRadioBtns.find((button) => button.value === direction);
@@ -164,6 +198,9 @@
     }
   }
 
+  /**
+   * Apply the user's last selected smooth scroll preference.
+   */
   function setupZenscroll(config: LocalConfig): void {
     window.zenscroll.setup(170);
     if (config.smoothScroll) {
@@ -173,6 +210,9 @@
     }
   }
 
+  /**
+   * Apply the user's last selected dark mode preference.
+   */
   function setupDarkMode(config: LocalConfig): void {
     darkModeCheckbox.checked = config.darkMode ?? false;
     // Setting `checked` does not fire the `change` event, so we must dispatch it manually
@@ -182,6 +222,9 @@
     }
   }
 
+  /**
+   * Apply the user's last selected collapse spacing preference.
+   */
   function setupSeamless(config: LocalConfig): void {
     seamlessCheckbox.checked = config.seamless ?? false;
     if (config.seamless) {
@@ -190,41 +233,69 @@
     }
   }
 
+  /**
+   * @returns Width of the browser viewport in pixels.
+   */
   function getWidth(): number {
     return document.documentElement.clientWidth;
   }
 
+  /**
+   * @returns Height of the browser viewport in pixels.
+   */
   function getHeight(): number {
     return document.documentElement.clientHeight;
   }
 
+  function getImageHeightAttribute(img: HTMLImageElement): number {
+    return parseInt(img.getAttribute('height') || '-1', 10);
+  }
+
+  function getImageWidthAttribute(img: HTMLImageElement): number {
+    return parseInt(img.getAttribute('width') || '-1', 10);
+  }
+
+  /**
+   * @returns Rescaled height of an image if sized to `width`, preserving aspect ratio.
+   */
+  function widthToRatioHeight(img: HTMLImageElement, width: number): number {
+    return (width / getImageWidthAttribute(img)) * getImageHeightAttribute(img);
+  }
+
+  /**
+   * @returns Rescaled width of an image if sized to `height`, preserving aspect ratio.
+   */
+  function heightToRatioWidth(img: HTMLImageElement, height: number): number {
+    return (height / getImageHeightAttribute(img)) * getImageWidthAttribute(img);
+  }
+
   function handleOriginalSize(): void {
-    setImagesWidth(SCREENCLAMP.none, getWidth());
+    setImagesWidth('none', getWidth());
     writeConfig({ scaling: 'none' });
   }
 
   function handleShrinkSize(): void {
-    setImagesDimensions(SCREENCLAMP.shrink, getWidth(), getHeight());
+    setImagesDimensions('shrink', getWidth(), getHeight());
     writeConfig({ scaling: 'shrink' });
   }
 
   function handleFitWidth(): void {
-    setImagesWidth(SCREENCLAMP.fit, getWidth());
+    setImagesWidth('fit', getWidth());
     writeConfig({ scaling: 'fit_width' });
   }
 
   function handleFitHeight(): void {
-    setImagesHeight(SCREENCLAMP.fit, getHeight());
+    setImagesHeight('fit', getHeight());
     writeConfig({ scaling: 'fit_height' });
   }
 
   function handleShrinkWidth(): void {
-    setImagesWidth(SCREENCLAMP.shrink, getWidth());
+    setImagesWidth('shrink', getWidth());
     writeConfig({ scaling: 'shrink_width' });
   }
 
   function handleShrinkHeight(): void {
-    setImagesHeight(SCREENCLAMP.shrink, getHeight());
+    setImagesHeight('shrink', getHeight());
     writeConfig({ scaling: 'shrink_height' });
   }
 
@@ -238,112 +309,110 @@
     }
   }
 
-  function setImagesWidth(fitMode: keyof typeof SCREENCLAMP, width: number) {
+  function setImagesWidth(fitMode: ScreenClamp, width: number) {
     for (const img of images) {
       switch (fitMode) {
-        case SCREENCLAMP.fit:
+        case 'fit':
           Object.assign(img.style, {
             width: `${width}px`,
-            maxWidth: 'none',
-            height: 'auto',
-            maxHeight: 'none',
+            height: `${widthToRatioHeight(img, width)}px`,
           });
           break;
-        case SCREENCLAMP.shrink:
+        case 'shrink':
+          const maxWidth = Math.min(getImageWidthAttribute(img), width);
           Object.assign(img.style, {
-            width: 'auto',
-            maxWidth: `${width}px`,
-            height: 'auto',
-            maxHeight: 'none',
+            width: `${maxWidth}px`,
+            height: `${widthToRatioHeight(img, maxWidth)}px`,
           });
           break;
         default:
           Object.assign(img.style, {
             width: null,
-            maxWidth: null,
             height: null,
-            maxHeight: null,
           });
       }
     }
     visiblePage?.scrollIntoView();
   }
 
-  function setImagesHeight(fitMode: keyof typeof SCREENCLAMP, height: number) {
+  function setImagesHeight(fitMode: ScreenClamp, height: number) {
     for (const img of images) {
       switch (fitMode) {
-        case SCREENCLAMP.fit:
+        case 'fit':
           Object.assign(img.style, {
             height: `${height}px`,
-            maxWidth: 'none',
-            width: 'auto',
-            maxHeight: 'none',
+            width: `${heightToRatioWidth(img, height)}px`,
           });
           break;
-        case SCREENCLAMP.shrink:
+        case 'shrink':
+          const maxHeight = Math.min(getImageHeightAttribute(img), height);
           Object.assign(img.style, {
-            width: 'auto',
-            maxHeight: `${height}px`,
-            height: 'auto',
-            maxWidth: 'none',
+            width: `${heightToRatioWidth(img, maxHeight)}px`,
+            height: `${maxHeight}px`,
           });
           break;
         default:
           Object.assign(img.style, {
             width: null,
-            maxWidth: null,
             height: null,
-            maxHeight: null,
           });
       }
     }
     visiblePage?.scrollIntoView({ inline: 'center' });
   }
 
-  function setImagesDimensions(fitMode: keyof typeof SCREENCLAMP, width: number, height: number) {
+  function setImagesDimensions(fitMode: ScreenClamp, width: number, height: number) {
     for (const img of images) {
       switch (fitMode) {
-        case SCREENCLAMP.fit:
+        case 'fit':
           // Not implemented
           break;
-        case SCREENCLAMP.shrink:
-          Object.assign(img.style, {
-            width: 'auto',
-            maxHeight: `${height}px`,
-            height: 'auto',
-            maxWidth: `${width}px`,
-          });
+        case 'shrink':
+          clampImageSize(img, height, width);
           break;
         default:
           Object.assign(img.style, {
             width: null,
-            maxWidth: null,
             height: null,
-            maxHeight: null,
           });
       }
     }
     visiblePage?.scrollIntoView();
   }
 
+  function clampImageSize(img: HTMLImageElement, height: number, width: number) {
+    const scaledWidth = heightToRatioWidth(img, height);
+    const scaledHeight = widthToRatioHeight(img, width);
+    if (getImageHeightAttribute(img) <= height && getImageWidthAttribute(img) <= width) {
+      Object.assign(img.style, {
+        width: null,
+        height: null,
+      });
+    } else if (scaledWidth > width) {
+      Object.assign(img.style, {
+        width: `${width}px`,
+        height: `${scaledHeight}px`,
+      });
+    } else if (scaledHeight > height) {
+      Object.assign(img.style, {
+        width: `${scaledWidth}px`,
+        height: `${height}px`,
+      });
+    }
+  }
+
   function smartFitImages(fitMode: FitDimensions): void {
     for (const { image: img, orientation: orient } of imagesMeta) {
       switch (orient) {
         case ORIENTATION.portrait:
+          const maxHeight = Math.min(getImageHeightAttribute(img), fitMode.portrait.height);
           Object.assign(img.style, {
-            width: 'auto',
-            maxWidth: 'none',
-            height: 'auto',
-            maxHeight: `${fitMode.portrait.height}px`,
+            width: `${heightToRatioWidth(img, maxHeight)}px`,
+            height: `${maxHeight}px`,
           });
           break;
         case ORIENTATION.landscape:
-          Object.assign(img.style, {
-            width: 'auto',
-            maxWidth: `${getWidth()}px`,
-            height: 'auto',
-            maxHeight: `${fitMode.landscape.height}px`,
-          });
+          clampImageSize(img, fitMode.landscape.height, getWidth());
           break;
       }
     }

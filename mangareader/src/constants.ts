@@ -12,12 +12,6 @@ const defaultConfig: LocalConfig = {
   seamless: false,
 };
 
-const SCREENCLAMP = {
-  none: 'none',
-  shrink: 'shrink',
-  fit: 'fit',
-} as const;
-
 const ORIENTATION = {
   portrait: 'portrait',
   square: 'square',

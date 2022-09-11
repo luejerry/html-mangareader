@@ -20,6 +20,8 @@ interface LocalConfig {
   direction?: Direction;
 }
 
+type ScreenClamp = 'none' | 'shrink' | 'fit';
+
 type FitSizes = 'size0' | 'size1';
 
 interface FitDimensions {
