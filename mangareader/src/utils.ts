@@ -63,6 +63,25 @@ function throttle<T extends (...args: any[]) => void>(func: T, millis: number) {
   };
 }
 
+function debounce<T extends (...args: any[]) => void>(func: T, millis: number, initial = false) {
+  let count = 0;
+  const loop = async (...args: Parameters<T>) => {
+    if (!count && initial) {
+      func(...args);
+    }
+    count++;
+    const id = count;
+    await asyncTimeout(millis);
+    if (id === count) {
+      count = 0;
+      if (id > 1) {
+        func(...args);
+      }
+    }
+  };
+  return loop;
+}
+
 /**
  * Basic semver comparator. Only works with numbers, e.g. 1.2.1. Returns positive if target newer
  * than source, negative if target older than source, or zero if equal.

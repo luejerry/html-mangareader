@@ -51,5 +51,6 @@ interface ScrubberState {
   previewHeight: number;
   markerHeight: number;
   visiblePageIndex: number;
+  previewPageIndex: number;
   viewDirection: Direction;
 }

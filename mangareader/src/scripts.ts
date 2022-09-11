@@ -41,6 +41,7 @@
     previewHeight: 0,
     markerHeight: 0,
     visiblePageIndex: 0,
+    previewPageIndex: 0,
     viewDirection: 'vertical',
   };
 
@@ -61,6 +62,7 @@
    * Setup tasks to be run when the user scrolls to a new page.
    */
   function setupIntersectionObserver(threshold: number, rootMargin: string): IntersectionObserver {
+    const throttledUpdateLoadedImages = throttle(updateLoadedImages, 1000);
     const observer = onIntersectChange(
       (target: HTMLElement) => {
         visiblePage = target;
@@ -75,6 +77,8 @@
         // Update the scrubber marker as user scrolls.
         scrubberState.visiblePageIndex = parseInt(target.dataset.index, 10);
         setScrubberMarkerActive(scrubberState.visiblePageIndex);
+
+        throttledUpdateLoadedImages(images, scrubberState.visiblePageIndex, 'pageloader');
       },
       { threshold, rootMargin },
     );
@@ -82,6 +86,30 @@
       observer.observe(page);
     }
     return observer;
+  }
+
+  function updateLoadedImages(
+    imgs: HTMLImageElement[],
+    visiblePageIndex: number,
+    tag: string,
+  ): void {
+    animationDispatcher.addTask(tag, () => {
+      const maxDistance = maxLoadedImages / 2;
+      for (const [i, img] of imgs.entries()) {
+        if (
+          (!img.src || img.src === loadingPlaceholder) &&
+          Math.max(visiblePageIndex - maxDistance, 0) <= i &&
+          i <= visiblePageIndex + maxDistance
+        ) {
+          img.src = img.dataset.src || '';
+        } else if (
+          img.src !== loadingPlaceholder &&
+          (i < visiblePageIndex - maxDistance || visiblePageIndex + maxDistance < i)
+        ) {
+          img.src = loadingPlaceholder;
+        }
+      }
+    });
   }
 
   const imagesMeta = images.map((image) => {
@@ -529,11 +557,14 @@
   }
 
   function setupScrubberPreview(): HTMLImageElement[] {
-    const previewImages = images.map((img) => {
+    const previewImages = images.map((img, i) => {
       const previewImage = document.createElement('img');
       previewImage.loading = 'lazy';
-      previewImage.src = img.src;
       previewImage.classList.add('scrubber-preview-image');
+      previewImage.dataset.index = `${i}`;
+      previewImage.src = loadingPlaceholder;
+      previewImage.dataset.src = img.dataset.src;
+      previewImage.style.width = `${heightToRatioWidth(img, 180)}px`;
       return previewImage;
     });
     scrubberPreviewDiv.append(...previewImages);
@@ -577,6 +608,8 @@
       scrubberMarker.innerText = text;
     };
 
+    const debouncedUpdateLoadedImages = debounce(updateLoadedImages, 50);
+
     let scrubberActivated = false;
     scrubberDiv.addEventListener('mouseenter', () => {
       if (!scrubberActivated) {
@@ -595,25 +628,28 @@
 
     scrubberDiv.addEventListener('mouseleave', () => {
       scrubberContainerDiv.style.opacity = '0';
+      // set page number to -100 to effectively unload all images
+      updateLoadedImages(scrubberImages, -100, 'scrubber');
     });
 
     scrubberDiv.addEventListener('mousemove', (event) => {
       const cursorY = event.clientY;
       const cursorYRatio = cursorY / scrubberState.screenHeight;
-      const imageIndex = Math.floor(cursorYRatio * images.length);
-      const image = scrubberImages[imageIndex];
+      scrubberState.previewPageIndex = Math.floor(cursorYRatio * images.length);
+      debouncedUpdateLoadedImages(scrubberImages, scrubberState.previewPageIndex, 'scrubber');
+      const image = scrubberImages[scrubberState.previewPageIndex];
       if (!image) {
         return;
       }
       if (event.buttons & 1) {
         // Allow left click drag scrubbing
-        if (imageIndex !== scrubberState.visiblePageIndex) {
-          images[imageIndex]?.scrollIntoView({ inline: 'center' });
+        if (scrubberState.previewPageIndex !== scrubberState.visiblePageIndex) {
+          images[scrubberState.previewPageIndex]?.scrollIntoView({ inline: 'center' });
         }
       }
       animationDispatcher.addTask('mousemove', () => {
         setMarkerPosition(cursorY);
-        setMarkerText(`${imageIndex + 1}`);
+        setMarkerText(`${scrubberState.previewPageIndex + 1}`);
         setPreviewScroll(cursorY);
         if (prevImage !== image) {
           image.classList.add('hovered');
