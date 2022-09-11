@@ -78,7 +78,7 @@
   let intersectObserver = setupIntersectionObserver(0, INTERSECT_MARGIN.vertical);
 
   const imagesMeta = images.map((image) => {
-    const ratio = image.naturalWidth / image.naturalHeight;
+    const ratio = image.width / image.height;
     return {
       image,
       orientation: ratio > 1 ? 'landscape' : 'portrait',
@@ -244,17 +244,17 @@
         case SCREENCLAMP.fit:
           Object.assign(img.style, {
             width: `${width}px`,
-            maxWidth: null,
-            height: null,
-            maxHeight: null,
+            maxWidth: 'none',
+            height: 'auto',
+            maxHeight: 'none',
           });
           break;
         case SCREENCLAMP.shrink:
           Object.assign(img.style, {
-            width: null,
+            width: 'auto',
             maxWidth: `${width}px`,
-            height: null,
-            maxHeight: null,
+            height: 'auto',
+            maxHeight: 'none',
           });
           break;
         default:
@@ -275,17 +275,17 @@
         case SCREENCLAMP.fit:
           Object.assign(img.style, {
             height: `${height}px`,
-            maxWidth: null,
-            width: null,
-            maxHeight: null,
+            maxWidth: 'none',
+            width: 'auto',
+            maxHeight: 'none',
           });
           break;
         case SCREENCLAMP.shrink:
           Object.assign(img.style, {
-            width: null,
+            width: 'auto',
             maxHeight: `${height}px`,
-            height: null,
-            maxWidth: null,
+            height: 'auto',
+            maxWidth: 'none',
           });
           break;
         default:
@@ -308,9 +308,9 @@
           break;
         case SCREENCLAMP.shrink:
           Object.assign(img.style, {
-            width: null,
+            width: 'auto',
             maxHeight: `${height}px`,
-            height: null,
+            height: 'auto',
             maxWidth: `${width}px`,
           });
           break;
@@ -331,17 +331,17 @@
       switch (orient) {
         case ORIENTATION.portrait:
           Object.assign(img.style, {
-            width: null,
-            maxWidth: null,
-            height: null,
+            width: 'auto',
+            maxWidth: 'none',
+            height: 'auto',
             maxHeight: `${fitMode.portrait.height}px`,
           });
           break;
         case ORIENTATION.landscape:
           Object.assign(img.style, {
-            width: null,
+            width: 'auto',
             maxWidth: `${getWidth()}px`,
-            height: null,
+            height: 'auto',
             maxHeight: `${fitMode.landscape.height}px`,
           });
           break;
@@ -462,6 +462,7 @@
   function setupScrubberPreview(): HTMLImageElement[] {
     const previewImages = images.map((img) => {
       const previewImage = document.createElement('img');
+      previewImage.loading = 'lazy';
       previewImage.src = img.src;
       previewImage.classList.add('scrubber-preview-image');
       return previewImage;

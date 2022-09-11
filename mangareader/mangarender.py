@@ -15,6 +15,7 @@ from mangareader.templates import RAR_TYPES, ZIP_TYPES, _7Z_TYPES
 from mangareader.sevenzipadapter import SevenZipAdapter
 from mangareader.config import CONFIG_KEY
 from shutil import copy
+import imagesize
 
 
 def render_from_template(
@@ -42,7 +43,6 @@ def render_from_template(
     """
     if not paths:
         raise ImagesNotFound('No images were sent to the renderer.')
-    imagepaths = [Path(p).as_uri() for p in paths]
     try:
         write_config = json.dumps(
             {
@@ -55,14 +55,17 @@ def render_from_template(
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
         html_template = Template(doc_template)
         img_template = Template(page_template)
+        img_dimensions = [imagesize.get(path) for path in paths]
         img_list = [
             img_template.substitute(
-                img=imagepaths[i],
+                img=Path(path).as_uri(),
+                width=img_dimensions[i][0],
+                height=img_dimensions[i][1],
                 id=str(i),
                 previd=str(i - 1) if i > 0 else 'none',
-                nextid=str(i + 1) if i < len(imagepaths) - 1 else 'none',
+                nextid=str(i + 1) if i < len(list(paths)) - 1 else 'none',
             )
-            for i in range(0, len(imagepaths))
+            for i, path in enumerate(paths)
         ]
         doc_string = html_template.substitute(
             pages=''.join(img_list),
