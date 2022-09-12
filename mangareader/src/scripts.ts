@@ -466,7 +466,7 @@
           });
           break;
         case ORIENTATION.landscape:
-          clampImageSize(img, screenHeight, screenWidth);
+          clampImageSize(img, Math.min(screenHeight, fitMode.landscape.height), screenWidth);
           break;
       }
     }

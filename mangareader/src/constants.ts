@@ -29,7 +29,7 @@ const smartFit: { [K in FitSizes]: FitDimensions } = {
       height: 1024,
     },
     landscape: {
-      height: 800,
+      height: 1024,
     },
   },
   size1: {
@@ -38,7 +38,7 @@ const smartFit: { [K in FitSizes]: FitDimensions } = {
       height: 1440,
     },
     landscape: {
-      height: 1080,
+      height: 1280,
     },
   },
 };
