@@ -43,7 +43,7 @@ The app can be started in several different ways:
 
 ## Advanced options
 
-In addition to the in-app options, some advanced options can be configured in the app's `config.ini` file:
+In addition to the in-app options, some advanced options can be configured in the app's `config.ini` file (if it doesn't exist, run the app to generate it):
 
 - Windows: `C:\Users\<username>\AppData\Local\html-mangareader\config.ini`
 - MacOS: `/Users/<username>/Library/Application Support/html-mangareader/config.ini`
@@ -54,8 +54,8 @@ In addition to the in-app options, some advanced options can be configured in th
   - Example: `browser = C:\Program Files\Google\Chrome\Application\chrome.exe`
 - **disableNavButtons** (default: no): hide the next/previous page controls in the app.
   - Example: `disableNavButtons = yes`
-- **disableNavBar** (default: no): hide the right side quick navigation control in the app.
-- **dynamicImageLoading** (default: no): reduce memory usage of the app by aggressively unloading images that are not currently visible, at the cost of scrolling performance and heavier disk usage.
+- **disableNavBar** (default: no): disable the right side quick navigation control in the app. This can speed up the loading of large image sets.
+- **dynamicImageLoading** (default: no): reduce memory usage of the app by aggressively unloading images that are not currently visible. Can significantly reduce memory usage (up to 80% reduction) for large image sets, but may impact scrolling performance and also cause issues with opening multiple tabs.
   - Example: `dynamicImageLoading = yes`
 
 ## For developers
