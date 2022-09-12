@@ -1,10 +1,11 @@
-import asyncio
 import platform
 import sys
 import traceback
 import webbrowser
 from argparse import ArgumentParser, Namespace
-from os import path
+from os import makedirs, path
+import tempfile
+from shutil import rmtree
 from tkinter import Tk, filedialog, messagebox
 
 from mangareader import templates
@@ -48,15 +49,18 @@ def get_platform_args() -> Namespace:
     return cli_args
 
 
-async def main() -> None:
+def main() -> None:
     config = get_or_create_config()
     args = get_platform_args()
+
     tk = Tk()
     tk.resizable(width=False, height=False)
     tk.title('[HTML] Mangareader')
     tk.geometry('400x80')
     progress_bar = MRProgressBar(tk)
+
     if not args.path:
+        # Open file picker UI
         imagetypes = [f'.{ext}' for ext in templates.DEFAULT_IMAGETYPES]
         archivetypes = [
             f'.{ext}' for ext in (*templates.ZIP_TYPES, *templates.RAR_TYPES, *templates._7Z_TYPES)
@@ -79,6 +83,10 @@ async def main() -> None:
     lib_dir = f'{working_dir}/mangareader'
     with open(f'{working_dir}/version', encoding='utf-8') as version_file:
         version = version_file.read().strip()
+
+    temp_dir = path.join(tempfile.gettempdir(), 'html-mangareader')
+    rmtree(temp_dir, ignore_errors=True)
+    makedirs(temp_dir, exist_ok=True)
 
     def run():
         try:
@@ -105,13 +113,12 @@ async def main() -> None:
                     )
                 webbrowser.get().open(boot_path.as_uri())
         except Exception as e:
-            Tk().withdraw()
             messagebox.showerror(
                 'Mangareader encountered an error: ' + type(e).__name__,
                 ''.join(traceback.format_exc()),
             )
         finally:
-            # Destroy the tk window only if we don't spawn any background tasks (otherwise task
+            # Destroy the tk window now only if we don't spawn any background tasks (otherwise task
             # completion will take care of destroying)
             if not is_background_tasks(config):
                 tk.destroy()
@@ -121,4 +128,4 @@ async def main() -> None:
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

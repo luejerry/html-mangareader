@@ -60,7 +60,6 @@ def render_from_template(
         )
     except:
         write_config = '{}'
-    os.makedirs(os.path.dirname(outfile), exist_ok=True)
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
         html_template = Template(doc_template)
         img_template = Template(page_template)
