@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from os import makedirs, path
+
 import appdirs
 
 CONFIG_KEY = 'mangareader'
@@ -44,3 +45,7 @@ def get_or_create_config() -> ConfigParser:
         with open(config_path, 'w') as config_file:
             config.write(config_file)
     return config
+
+
+def is_background_tasks(config: ConfigParser) -> bool:
+    return not config[CONFIG_KEY].getboolean('disableNavBar')

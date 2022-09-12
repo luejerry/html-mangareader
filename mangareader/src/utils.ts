@@ -74,7 +74,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, millis: number, i
     await asyncTimeout(millis);
     if (id === count) {
       count = 0;
-      if (id > 1) {
+      if (id > 1 || !initial) {
         func(...args);
       }
     }

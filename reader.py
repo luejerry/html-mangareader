@@ -1,13 +1,16 @@
+import asyncio
+import platform
 import sys
 import traceback
 import webbrowser
 from argparse import ArgumentParser, Namespace
 from os import path
-import platform
-from tkinter import Tk, messagebox, filedialog
-from mangareader.mangarender import extract_render
+from tkinter import Tk, filedialog, messagebox
+
 from mangareader import templates
-from mangareader.config import CONFIG_KEY, get_or_create_config
+from mangareader.config import CONFIG_KEY, get_or_create_config, is_background_tasks
+from mangareader.mangarender import extract_render
+from mangareader.progress import MRProgressBar
 
 
 def parse_args() -> Namespace:
@@ -45,9 +48,14 @@ def get_platform_args() -> Namespace:
     return cli_args
 
 
-def main() -> None:
+async def main() -> None:
     config = get_or_create_config()
     args = get_platform_args()
+    tk = Tk()
+    tk.resizable(width=False, height=False)
+    tk.title('[HTML] Mangareader')
+    tk.geometry('400x80')
+    progress_bar = MRProgressBar(tk)
     if not args.path:
         imagetypes = [f'.{ext}' for ext in templates.DEFAULT_IMAGETYPES]
         archivetypes = [
@@ -71,34 +79,46 @@ def main() -> None:
     lib_dir = f'{working_dir}/mangareader'
     with open(f'{working_dir}/version', encoding='utf-8') as version_file:
         version = version_file.read().strip()
-    try:
-        boot_path = extract_render(
-            path=target_path,
-            version=version,
-            doc_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["doc"]}',
-            page_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["page"]}',
-            boot_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["boot"]}',
-            asset_paths=(f'{lib_dir}/{asset}' for asset in templates.ASSETS),
-            img_types=templates.DEFAULT_IMAGETYPES,
-            config=config,
-        )
-        if args.no_browser:
-            print(boot_path)
-        else:
-            if config[CONFIG_KEY]['browser']:
-                webbrowser.register(
-                    config[CONFIG_KEY]['browser'],
-                    None,
-                    instance=webbrowser.GenericBrowser(config[CONFIG_KEY]['browser']),
-                    preferred=True,
-                )
-            webbrowser.get().open(boot_path.as_uri())
-    except Exception as e:
-        Tk().withdraw()
-        messagebox.showerror(
-            'Mangareader encountered an error: ' + type(e).__name__, ''.join(traceback.format_exc())
-        )
+
+    def run():
+        try:
+            boot_path = extract_render(
+                path=target_path,
+                version=version,
+                doc_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["doc"]}',
+                page_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["page"]}',
+                boot_template_path=f'{lib_dir}/{templates.HTML_TEMPLATES["boot"]}',
+                asset_paths=(f'{lib_dir}/{asset}' for asset in templates.ASSETS),
+                img_types=templates.DEFAULT_IMAGETYPES,
+                config=config,
+                progress_bar=progress_bar,
+            )
+            if args.no_browser:
+                print(boot_path)
+            else:
+                if config[CONFIG_KEY]['browser']:
+                    webbrowser.register(
+                        config[CONFIG_KEY]['browser'],
+                        None,
+                        instance=webbrowser.GenericBrowser(config[CONFIG_KEY]['browser']),
+                        preferred=True,
+                    )
+                webbrowser.get().open(boot_path.as_uri())
+        except Exception as e:
+            Tk().withdraw()
+            messagebox.showerror(
+                'Mangareader encountered an error: ' + type(e).__name__,
+                ''.join(traceback.format_exc()),
+            )
+        finally:
+            # Destroy the tk window only if we don't spawn any background tasks (otherwise task
+            # completion will take care of destroying)
+            if not is_background_tasks(config):
+                tk.destroy()
+
+    tk.after(0, run)
+    tk.mainloop()
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

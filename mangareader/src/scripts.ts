@@ -80,7 +80,12 @@
         scrubberState.visiblePageIndex = parseInt(target.dataset.index, 10);
         setScrubberMarkerActive(scrubberState.visiblePageIndex);
         if (configIni.dynamicImageLoading) {
-          throttledUpdateLoadedImages(images, scrubberState.visiblePageIndex, 'pageloader');
+          throttledUpdateLoadedImages(
+            images,
+            scrubberState.visiblePageIndex,
+            maxLoadedImages,
+            'pageloader',
+          );
         }
       },
       { threshold, rootMargin },
@@ -91,20 +96,32 @@
     return observer;
   }
 
+  /**
+   * Load and unload images as the visible page changes with scrolling.
+   * @param imgs Images to load/unload.
+   * @param visiblePageIndex Index of currently visible page. Images within a distance of this page
+   * are loaded, and images outside this distance are unloaded. A null value unloads all images.
+   * @param maxLoad Maximum number of images to be loaded at once.
+   * @param tag Task identifier, to distinguish separate usages from each other in the animation
+   * scheduler.
+   */
   function updateLoadedImages(
     imgs: HTMLImageElement[],
-    visiblePageIndex: number,
+    visiblePageIndex: number | null,
+    maxLoad: number,
     tag: string,
   ): void {
     animationDispatcher.addTask(tag, () => {
-      const maxDistance = maxLoadedImages / 2;
+      const maxDistance = maxLoad / 2;
       for (const [i, img] of imgs.entries()) {
-        if (
+        if (visiblePageIndex == null) {
+          img.src = loadingPlaceholder;
+        } else if (
           (!img.src || img.src === loadingPlaceholder) &&
           Math.max(visiblePageIndex - maxDistance, 0) <= i &&
           i <= visiblePageIndex + maxDistance
         ) {
-          img.src = img.dataset.src || '';
+          img.src = img.dataset.src || loadingPlaceholder;
         } else if (
           img.src !== loadingPlaceholder &&
           (i < visiblePageIndex - maxDistance || visiblePageIndex + maxDistance < i)
@@ -437,6 +454,8 @@
   }
 
   function smartFitImages(fitMode: FitDimensions): void {
+    const screenWidth = getWidth();
+    const screenHeight = getHeight();
     for (const { image: img, orientation: orient } of imagesMeta) {
       switch (orient) {
         case ORIENTATION.portrait:
@@ -447,7 +466,7 @@
           });
           break;
         case ORIENTATION.landscape:
-          clampImageSize(img, fitMode.landscape.height, getWidth());
+          clampImageSize(img, screenHeight, screenWidth);
           break;
       }
     }
@@ -571,10 +590,15 @@
       previewImage.dataset.index = `${i}`;
       if (configIni.dynamicImageLoading) {
         previewImage.src = loadingPlaceholder;
-        previewImage.dataset.src = img.dataset.src;
       } else {
-        previewImage.src = img.src;
+        previewImage.src = img.dataset.thumbnail || loadingPlaceholder;
       }
+      previewImage.dataset.src = `${img.dataset.thumbnail}`;
+      previewImage.addEventListener('error', async (event) => {
+        previewImage.src = loadingPlaceholder;
+        await asyncTimeout(2000);
+        previewImage.src = previewImage.dataset.src || loadingPlaceholder;
+      });
       previewImage.style.width = `${heightToRatioWidth(img, 180)}px`;
       return previewImage;
     });
@@ -624,7 +648,7 @@
       scrubberMarker.innerText = text;
     };
 
-    const debouncedUpdateLoadedImages = debounce(updateLoadedImages, 50);
+    const debouncedUpdateLoadedImages = debounce(updateLoadedImages, 0);
 
     let scrubberActivated = false;
     scrubberDiv.addEventListener('mouseenter', () => {
@@ -645,8 +669,7 @@
     scrubberDiv.addEventListener('mouseleave', () => {
       scrubberContainerDiv.style.opacity = '0';
       if (configIni.dynamicImageLoading) {
-        // set page number to -100 to effectively unload all images
-        updateLoadedImages(scrubberImages, -100, 'scrubber');
+        updateLoadedImages(scrubberImages, null, maxLoadedPreviews, 'scrubber');
       }
     });
 
@@ -655,7 +678,12 @@
       const cursorYRatio = cursorY / scrubberState.screenHeight;
       scrubberState.previewPageIndex = Math.floor(cursorYRatio * images.length);
       if (configIni.dynamicImageLoading) {
-        debouncedUpdateLoadedImages(scrubberImages, scrubberState.previewPageIndex, 'scrubber');
+        debouncedUpdateLoadedImages(
+          scrubberImages,
+          scrubberState.previewPageIndex,
+          maxLoadedPreviews,
+          'scrubber',
+        );
       }
       const image = scrubberImages[scrubberState.previewPageIndex];
       if (!image) {

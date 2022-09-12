@@ -1,25 +1,32 @@
+import base64
+import json
 import os
 import re
 import tempfile
-import json
-import base64
 import zipfile
-import rarfile
-import py7zr
+from concurrent.futures import ThreadPoolExecutor
 from configparser import ConfigParser
+from multiprocessing import cpu_count
 from pathlib import Path
-from string import Template
-from typing import List, Any, Union, Iterable
-from mangareader.excepts import ImagesNotFound
-from mangareader.templates import IMG_PLACEHOLDER, RAR_TYPES, ZIP_TYPES, _7Z_TYPES
-from mangareader.sevenzipadapter import SevenZipAdapter
-from mangareader.config import CONFIG_KEY
-import mangareader.imagesize as imagesize
 from shutil import copy
+from string import Template
+from typing import Any, Iterable, List, Optional, Union
+
+import py7zr
+import rarfile
+from PIL import Image
+
+import mangareader.imagesize as imagesize
+from mangareader.config import CONFIG_KEY
+from mangareader.excepts import ImagesNotFound
+from mangareader.progress import MRProgressBar
+from mangareader.sevenzipadapter import SevenZipAdapter
+from mangareader.templates import _7Z_TYPES, IMG_PLACEHOLDER, RAR_TYPES, ZIP_TYPES
 
 
 def render_from_template(
     paths: Iterable[Union[Path, str]],
+    thumbnails: Iterable[Optional[Path]],
     version: str,
     title: str,
     doc_template: str,
@@ -60,19 +67,24 @@ def render_from_template(
         img_dimensions = [imagesize.get(path) for path in paths]
         img_list = [
             img_template.substitute(
-                img=Path(path).as_uri()
-                if not config[CONFIG_KEY].getboolean('dynamicImageLoading')
-                else IMG_PLACEHOLDER,
-                lazyimg=Path(path).as_uri()
-                if config[CONFIG_KEY].getboolean('dynamicImageLoading')
-                else '',
+                img=(
+                    Path(path).as_uri()
+                    if not config[CONFIG_KEY].getboolean('dynamicImageLoading')
+                    else IMG_PLACEHOLDER
+                ),
+                lazyimg=(
+                    Path(path).as_uri()
+                    if config[CONFIG_KEY].getboolean('dynamicImageLoading')
+                    else ''
+                ),
+                thumbnail=thumbnail.as_uri() if thumbnail else '',
                 width=img_dimensions[i][0],
                 height=img_dimensions[i][1],
                 id=str(i),
                 previd=str(i - 1) if i > 0 else 'none',
                 nextid=str(i + 1) if i < len(list(paths)) - 1 else 'none',
             )
-            for i, path in enumerate(paths)
+            for i, (path, thumbnail) in enumerate(zip(paths, thumbnails))
         ]
         doc_string = html_template.substitute(
             pages=''.join(img_list),
@@ -192,6 +204,27 @@ def create_out_path(outpath: Path) -> None:
     outpath.mkdir(parents=True, exist_ok=True)
 
 
+def create_thumbnails(
+    paths: Iterable[Union[Path, str]],
+    outpath: Path,
+    progress_bar: MRProgressBar = None,
+) -> Iterable[Path]:
+    """Create thumbnails for all images in paths and save them to outpath."""
+    executor = ThreadPoolExecutor(max_workers=cpu_count() - 1)
+
+    def task(path: Union[Path, str]):
+        path = Path(path)
+        with Image.open(path) as img:
+            img.thumbnail((2000, 360), Image.Resampling.NEAREST)
+            img.save(outpath / f'{path.stem}_thumbnail.png')
+        if progress_bar:
+            progress_bar.tk.after(0, progress_bar.increment)
+
+    for p in paths:
+        executor.submit(task, p)
+    return ((outpath / f'{Path(path).stem}_thumbnail.png') for path in paths)
+
+
 def extract_render(
     path: str,
     version: str,
@@ -201,6 +234,7 @@ def extract_render(
     asset_paths: Iterable[str],
     img_types: Iterable[str],
     config: ConfigParser,
+    progress_bar: MRProgressBar,
     outpath: Path = Path(tempfile.gettempdir()) / 'html-mangareader',
 ) -> Path:
     """Main controller procedure. Handles opening of archive, image, or directory and renders the images
@@ -256,8 +290,18 @@ def extract_render(
             title = pPath.name
         create_out_path(outpath)
         render_copy(asset_paths, outpath)
+        if not config[CONFIG_KEY].getboolean('disableNavBar'):
+            progress_bar.set_total(len(imgpaths))
+            thumbnail_paths: Iterable[Optional[Path]] = create_thumbnails(
+                imgpaths, outpath, progress_bar
+            )
+        else:
+            thumbnail_paths = (None for _ in imgpaths)
+            progress_bar.tk.after_idle(lambda: progress_bar.tk.destroy())
+
         renderfile = render_from_template(
             paths=imgpaths,
+            thumbnails=thumbnail_paths,
             version=version,
             title=title,
             doc_template=doc_template,
