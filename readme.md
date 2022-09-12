@@ -50,12 +50,14 @@ In addition to the in-app options, some advanced options can be configured in th
 
 ### config.ini options
 
-- **browser** (default: none): specify the full path to a browser for the app to use. If blank, the default browser will be used.
-  - Example: `browser = C:\Program Files\Google\Chrome\Application\chrome.exe`
+- **browser** (default: none): specify the a browser for the app to use. Leave empty to use the default browser.
+  - Example (Windows): `browser = C:\Program Files\Google\Chrome\Application\chrome.exe`
+  - Example (Mac): `browser = open -a "/Applications/Safari.app" %%s`
 - **disableNavButtons** (default: no): hide the next/previous page controls in the app.
   - Example: `disableNavButtons = yes`
 - **disableNavBar** (default: no): disable the right side quick navigation control in the app. This can speed up the loading of large image sets.
-- **dynamicImageLoading** (default: no): reduce memory usage of the app by aggressively unloading images that are not currently visible. Can significantly reduce memory usage (up to 80% reduction) for large image sets, but may impact scrolling performance and also cause issues with opening multiple tabs.
+  - Example: `disableNavBar = yes`
+- **dynamicImageLoading** (default: no): reduce memory usage of the app by aggressively unloading images that are not currently visible. Can significantly reduce memory usage (up to 80%) for large image sets, but may impact scrolling performance and also cause issues with opening multiple tabs.
   - Example: `dynamicImageLoading = yes`
 
 ## For developers
