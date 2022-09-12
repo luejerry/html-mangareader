@@ -22,6 +22,31 @@ function includeIf(predicate, elem) {
   return predicate ? [elem] : [];
 }
 
+function asyncTimeout(millis) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(), millis);
+  });
+}
+
+function debounce(func, millis, initial = false) {
+  let count = 0;
+  const loop = async (...args) => {
+    if (!count && initial) {
+      func(...args);
+    }
+    count++;
+    const id = count;
+    await asyncTimeout(millis);
+    if (id === count) {
+      count = 0;
+      if (id > 1 || !initial) {
+        func(...args);
+      }
+    }
+  };
+  return loop;
+}
+
 async function execPrint(command) {
   try {
     const { stdout, stderr } = await execAsync(command);
@@ -75,12 +100,14 @@ function processArgs() {
 }
 
 function startWatch(args) {
+  const debouncedCompile = debounce(compile, 500);
   const watcher = watch(
     [
       'mangareader/**/*.py',
       'mangareader/**/*.ts',
       'mangareader/**/*.scss',
       'mangareader/**/*.html',
+      'reader.py',
     ],
     {
       persistent: true,
@@ -88,7 +115,7 @@ function startWatch(args) {
   );
   watcher.on('change', async (path) => {
     console.log('File changed:', path);
-    await compile(args);
+    await debouncedCompile(args);
   });
 }
 
