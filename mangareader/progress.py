@@ -24,6 +24,5 @@ class MRProgressBar:
         self.count += 1
         self.progress.step(100 / self.total)
         self.label['text'] = f'Processed image {self.count}/{self.total}'
-        self.tk.update_idletasks()
         if self.count == self.total:
             self.tk.destroy()
