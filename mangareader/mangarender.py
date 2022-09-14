@@ -10,18 +10,23 @@ from multiprocessing import cpu_count
 from pathlib import Path
 from shutil import copy
 from string import Template
-from typing import Any, Iterable, List, Optional, Union
+from typing import Any, Iterable, List, Optional, Tuple, Union
 
 import py7zr
 import rarfile
 from PIL import Image
 
-import mangareader.imagesize as imagesize
 from mangareader.config import CONFIG_KEY
 from mangareader.excepts import ImagesNotFound
 from mangareader.progress import MRProgressBar
 from mangareader.sevenzipadapter import SevenZipAdapter
 from mangareader.templates import _7Z_TYPES, IMG_PLACEHOLDER, RAR_TYPES, ZIP_TYPES
+
+
+def get_image_size(path: Union[Path, str]) -> Tuple[int, int]:
+    """Get the pixel dimensions (width, height) of an image file."""
+    with Image.open(path) as img:
+        return img.size
 
 
 def render_from_template(
@@ -63,7 +68,7 @@ def render_from_template(
     with open(outfile, 'w', encoding='utf-8', newline='\r\n') as renderfd:
         html_template = Template(doc_template)
         img_template = Template(page_template)
-        img_dimensions = [imagesize.get(path) for path in paths]
+        img_dimensions = [get_image_size(path) for path in paths]
         img_list = [
             img_template.substitute(
                 img=(
