@@ -35,6 +35,10 @@ interface FitDimensions {
     height: number;
     width?: number;
   };
+  portraitLong: {
+    height?: number;
+    width: number;
+  };
 }
 
 type Orientation = keyof FitDimensions;

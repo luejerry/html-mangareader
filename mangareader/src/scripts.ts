@@ -132,11 +132,11 @@
     });
   }
 
-  const imagesMeta = images.map((image) => {
-    const ratio = image.width / image.height;
+  const imagesMeta = images.map((image): { image: HTMLImageElement; orientation: Orientation } => {
+    const ratio = image.height / image.width;
     return {
       image,
-      orientation: (ratio > 1 ? 'landscape' : 'portrait') as Orientation,
+      orientation: ratio > 2 ? 'portraitLong' : ratio > 1 ? 'portrait' : 'landscape',
     };
   });
 
@@ -468,6 +468,12 @@
         case 'landscape':
           clampImageSize(img, Math.min(screenHeight, fitMode.landscape.height), screenWidth);
           break;
+        case 'portraitLong':
+          const maxWidth = Math.min(getImageWidthAttribute(img), fitMode.portraitLong.width);
+          Object.assign(img.style, {
+            width: `${maxWidth}px`,
+            height: `${widthToRatioHeight(img, maxWidth)}px`,
+          });
       }
     }
     visiblePage?.scrollIntoView({ inline: 'center' });
