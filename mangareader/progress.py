@@ -21,6 +21,13 @@ class MRProgressBar:
         self.total = total
 
     def increment(self) -> None:
+        """Increment the progress bar by 1. May be called from any thread.
+
+        If the progress bar is full, destroys the host Tk window.
+        """
+        self.tk.after(0, self._increment)
+
+    def _increment(self) -> None:
         self.count += 1
         self.progress.step(100 / self.total)
         self.label['text'] = f'Processed image {self.count}/{self.total}'

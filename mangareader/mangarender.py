@@ -23,10 +23,16 @@ from mangareader.sevenzipadapter import SevenZipAdapter
 from mangareader.templates import _7Z_TYPES, IMG_PLACEHOLDER, RAR_TYPES, ZIP_TYPES
 
 
-def get_image_size(path: Union[Path, str]) -> Tuple[int, int]:
-    """Get the pixel dimensions (width, height) of an image file."""
+def get_image_size(path: Union[Path, str]) -> Optional[Tuple[int, int]]:
+    """Get the pixel dimensions (width, height) of an image file.
+
+    Returns None if file is not a valid image.
+    """
+    try:
     with Image.open(path) as img:
         return img.size
+    except:
+        return None
 
 
 def render_from_template(
@@ -81,14 +87,16 @@ def render_from_template(
                     if config[CONFIG_KEY].getboolean('dynamicImageLoading')
                     else ''
                 ),
-                thumbnail=thumbnail.as_uri() if thumbnail else '',
-                width=img_dimensions[i][0],
-                height=img_dimensions[i][1],
+                thumbnail=thumbnail.as_uri() if thumbnail else IMG_PLACEHOLDER,
+                width=dimensions[0] if dimensions else 0,
+                height=dimensions[1] if dimensions else 0,
                 id=str(i),
                 previd=str(i - 1) if i > 0 else 'none',
                 nextid=str(i + 1) if i < len(list(paths)) - 1 else 'none',
             )
-            for i, (path, thumbnail) in enumerate(zip(paths, thumbnails))
+            for i, (path, thumbnail, dimensions) in enumerate(
+                zip(paths, thumbnails, img_dimensions)
+            )
         ]
         doc_string = html_template.substitute(
             pages=''.join(img_list),
@@ -216,13 +224,19 @@ def create_thumbnails(
     """Create thumbnails for all images in paths and save them to outpath."""
     executor = ThreadPoolExecutor(max_workers=cpu_count() - 1)
 
+    # Render thumbnails in parallel. No need to await these since the webapp can be started before
+    # this is completed. The last task to be completed exits the program
     def task(path: Union[Path, str]):
         path = Path(path)
+        try:
         with Image.open(path) as img:
             img.thumbnail((2000, 360), Image.Resampling.NEAREST)
             img.save(outpath / f'{path.stem}_thumbnail.png')
+        except:
+            pass
+        finally:
         if progress_bar:
-            progress_bar.tk.after(0, progress_bar.increment)
+                progress_bar.increment()
 
     for p in paths:
         executor.submit(task, p)
