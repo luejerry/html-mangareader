@@ -37,6 +37,8 @@ interface FitDimensions {
   };
 }
 
+type Orientation = keyof FitDimensions;
+
 type Direction = 'vertical' | 'horizontal' | 'horizontal-rtl';
 
 type Scaling =

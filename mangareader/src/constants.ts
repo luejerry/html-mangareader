@@ -4,23 +4,22 @@
  * CONFIGURATION AND CONSTANTS
  */
 const versionCheckUrl = 'https://api.github.com/repos/luejerry/html-mangareader/contents/version';
+/**
+ * Key for which app data is stored in LocalStorage
+ */
 const storageKey = 'mangareader-config';
+/**
+ * Max number of pages to load at once, if `dynamicImageLoading` is enabled in `config.ini`
+ */
 const maxLoadedImages = 20;
+/**
+ * Max number of navbar previews to load at once, if `dynamicImageLoading` is enabled in
+ * `config.ini`
+ */
 const maxLoadedPreviews = 60;
+
 const loadingPlaceholder =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8HwYAAloBV80ot9EAAAAASUVORK5CYII=';
-
-const defaultConfig: LocalConfig = {
-  smoothScroll: true,
-  darkMode: false,
-  seamless: false,
-};
-
-const ORIENTATION = {
-  portrait: 'portrait',
-  square: 'square',
-  landscape: 'landscape',
-} as const;
 
 const smartFit: { [K in FitSizes]: FitDimensions } = {
   size0: {

@@ -136,7 +136,7 @@
     const ratio = image.width / image.height;
     return {
       image,
-      orientation: ratio > 1 ? 'landscape' : 'portrait',
+      orientation: (ratio > 1 ? 'landscape' : 'portrait') as Orientation,
     };
   });
 
@@ -458,14 +458,14 @@
     const screenHeight = getHeight();
     for (const { image: img, orientation: orient } of imagesMeta) {
       switch (orient) {
-        case ORIENTATION.portrait:
+        case 'portrait':
           const maxHeight = Math.min(getImageHeightAttribute(img), fitMode.portrait.height);
           Object.assign(img.style, {
             width: `${heightToRatioWidth(img, maxHeight)}px`,
             height: `${maxHeight}px`,
           });
           break;
-        case ORIENTATION.landscape:
+        case 'landscape':
           clampImageSize(img, Math.min(screenHeight, fitMode.landscape.height), screenWidth);
           break;
       }

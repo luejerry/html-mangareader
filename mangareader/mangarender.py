@@ -29,8 +29,8 @@ def get_image_size(path: Union[Path, str]) -> Optional[Tuple[int, int]]:
     Returns None if file is not a valid image.
     """
     try:
-    with Image.open(path) as img:
-        return img.size
+        with Image.open(path) as img:
+            return img.size
     except:
         return None
 
@@ -53,6 +53,7 @@ def render_from_template(
     * `title`: title of the page.
     * `doc_template`: HTML template for the overall document.
     * `page_template`: HTML template for each comic page element.
+    * `config`: parsed `config.ini` file.
     * `outfile`: path to write the rendered document to. Defaults to OS temp directory.
 
     Returns: path to rendered HTML document.
@@ -190,13 +191,13 @@ def extract_zip(
     try:
         if file_ext in ZIP_TYPES:
             with zipfile.ZipFile(path, mode='r') as zip_file:
-                return extract_archive(img_types, zip_file)
+                return extract_archive(img_types, zip_file, outpath)
         elif file_ext in RAR_TYPES:
             with rarfile.RarFile(path, mode='r') as rar_file:
-                return extract_archive(img_types, rar_file)
+                return extract_archive(img_types, rar_file, outpath)
         elif file_ext in _7Z_TYPES:
             with SevenZipAdapter(path, mode='r') as _7z_file:
-                return extract_archive(img_types, _7z_file)
+                return extract_archive(img_types, _7z_file, outpath)
         else:
             raise ImagesNotFound(f'Unknown archive format: {path}')
     except ImagesNotFound:
@@ -229,13 +230,13 @@ def create_thumbnails(
     def task(path: Union[Path, str]):
         path = Path(path)
         try:
-        with Image.open(path) as img:
-            img.thumbnail((2000, 360), Image.Resampling.NEAREST)
-            img.save(outpath / f'{path.stem}_thumbnail.png')
+            with Image.open(path) as img:
+                img.thumbnail((2000, 360), Image.Resampling.NEAREST)
+                img.save(outpath / f'{path.stem}_thumbnail.png')
         except:
             pass
         finally:
-        if progress_bar:
+            if progress_bar:
                 progress_bar.increment()
 
     for p in paths:
@@ -265,7 +266,9 @@ def extract_render(
     * `page_template_path`: path to HTML template for individual comic page elements.
     * `boot_template_path`: path to HTML template for bootstrap document.
     * `asset_paths`: paths of static assets to copy.
-    * `image_types`: list of recognized image file extensions.
+    * `img_types`: list of recognized image file extensions.
+    * `config`: parsed `config.ini` file.
+    * `progress_bar`: progress bar UI to update.
     * `outpath`: directory to write temporary files in. Defaults to OS temp directory.
 
     Returns: Path to the bootstrap document, which can be opened in a web browser.
@@ -337,7 +340,6 @@ def extract_render(
 
     except ImagesNotFound:
         raise
-    return
 
 
 def filename_comparator(filename: Union[str, Path]) -> List[Any]:

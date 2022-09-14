@@ -3,6 +3,8 @@ from tkinter.ttk import Label, Progressbar
 
 
 class MRProgressBar:
+    """Progress bar UI component for the thumbnail loading UI."""
+
     tk: Tk
     progress: Progressbar
     label: Label
@@ -18,6 +20,7 @@ class MRProgressBar:
         self.label.grid(row=1, column=0, padx=10, pady=5)
 
     def set_total(self, total: int) -> None:
+        """Set the total number of images to process. Must be called before increment()."""
         self.total = total
 
     def increment(self) -> None:

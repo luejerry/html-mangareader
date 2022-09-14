@@ -1,6 +1,11 @@
 /**
  * GENERIC UTILITY FUNCTIONS
  */
+
+/**
+ * Convenience function that creates an `IntersectionObserver` that executes a callback passing it
+ * the element that is intersecting the viewport with the greatest intersection ratio.
+ */
 function onIntersectChange(
   targetIntersectHandler: (t: HTMLElement) => void,
   { threshold, rootMargin }: { threshold: number; rootMargin?: string },
@@ -63,6 +68,16 @@ function throttle<T extends (...args: any[]) => void>(func: T, millis: number) {
   };
 }
 
+/**
+ * Returns a debounced version of a given input function, which will be executed after `millis`
+ * milliseconds of no additional invocations. Each invocation that occurs within the timing window
+ * resets the timer.
+ * @param func Function to be debounced
+ * @param millis Debounce time in milliseconds
+ * @param initial If true, the initial invocation executes immediately before the debounce
+ * window begins. If no more invocations occur, the function is not executed again; otherwise
+ * behaves as if `initial = false`.
+ */
 function debounce<T extends (...args: any[]) => void>(func: T, millis: number, initial = false) {
   let count = 0;
   const loop = async (...args: Parameters<T>) => {
