@@ -43,7 +43,7 @@ The app can be started in several different ways:
 
 ## Advanced options
 
-In addition to the in-app options, some advanced options can be configured in the app's `config.ini` file (if it doesn't exist, run the app to generate it):
+In addition to the in-app options, some advanced options can be configured in the app's `config.ini` file (if it doesn't exist, make sure you have version >2.2.0 and run the app to generate it):
 
 - Windows: `C:\Users\<username>\AppData\Local\html-mangareader\config.ini`
 - MacOS: `/Users/<username>/Library/Application Support/html-mangareader/config.ini`
